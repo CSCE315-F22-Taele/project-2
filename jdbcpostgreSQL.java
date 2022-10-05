@@ -16,7 +16,10 @@ public class jdbcpostgreSQL {
   //Windows: java -cp ".;postgresql-42.2.8.jar" jdbcpostgreSQL
   //Mac/Linux: java -cp ".:postgresql-42.2.8.jar" jdbcpostgreSQL
 
-  //javac *java && java -cp ".:postgresql-42.2.8.jar" jdbcpostgreSQL
+  /*
+  javac *java && java -cp ".:postgresql-42.2.8.jar" jdbcpostgreSQL 
+  */
+
 
   //MAKE SURE YOU ARE ON VPN or TAMU WIFI TO ACCESS DATABASE
   public static void main(String args[]) {
@@ -41,7 +44,9 @@ public class jdbcpostgreSQL {
      System.out.println("Opened database successfully");
      String line = "";  
      String splitBy = ",";  
-     int order_number = 2;
+     int order_number = 0;
+     int customer_number = 0;
+     String prev_name = "";
      try{
        //create a statement object
        Statement stmt = conn.createStatement();
@@ -54,22 +59,31 @@ public class jdbcpostgreSQL {
       while ((line = br.readLine()) != null)   {  
 
         String[] order_entry = line.split(splitBy);    // use comma as separator  
-        String sqlStatement = "INSERT INTO order_entries (order_number, customer, cost, base, protein, queso, guacamole, chips_salsa, chips_queso, chips_gauc, drink_16oz, drink_22oz, server, order_date) VALUES (" + order_number + ", " + order_entry[0] + ", " + order_entry[1] + ", \'" + order_entry[2] + "\', \'" + order_entry[3] + "\', \'" + order_entry[4] + "\', \'" + order_entry[5] + "\', \'" + order_entry[6] + "\', \'" + order_entry[7] + "\', \'" + order_entry[7] + "\', \'" + order_entry[7] + "\', \'" + order_entry[7] + "\', \'" + order_entry[7] + "\', \'" + order_entry[7] + ")";
+        String sqlStatement = "INSERT INTO order_entries (order_number, customer, base, protein, guacamole, queso, chips_salsa, chips_queso, chips_guac, brownie, cookie, drink_16oz, drink_22oz, cost, date) VALUES (" + order_number + ", " + customer_number + ", \'" + order_entry[1] + "\', \'" + order_entry[2] + "\', \'" + order_entry[3] + "\', \'" + order_entry[4] + "\', \'" + order_entry[5] + "\', \'" + order_entry[6] + "\', \'" + order_entry[7] + "\', \'" + order_entry[8] + "\', \'" + order_entry[9] + "\', \'" + order_entry[10] + "\', \'" + order_entry[11] + "\', " + order_entry[12] + ", \'" + order_entry[13] + "\')";
 
-        //System.out.println(sqlStatement);
-        //TOTAL COST IS ORDER_ENTRY[1]
+        System.out.println(sqlStatement);
+        //System.out.println(order_entry[0] +  " " + customer_number);
+        //order_entry[0] == name
 
+        stmt.executeQuery(sqlStatement); //add to data base 
         order_number++;
-        
+
+        if ( prev_name.equals( order_entry[0] )) {
+          //System.out.println("same name");
+        } else {
+          customer_number++;
+        }
+
+        prev_name = order_entry[0];
         //send statement to DBMS
         //This executeQuery command is useful for data retrieval
 
-        ResultSet result = stmt.executeQuery(sqlStatement);
+        //ResultSet result = stmt.executeQuery(sqlStatement);
 
         //OUTPUT
         //You will need to output the results differently depeninding on which function you use
         //System.out.println("--------------------Query Results--------------------");
-        System.out.println(result);
+        //System.out.println(result);
 
       }
 
@@ -80,6 +94,7 @@ public class jdbcpostgreSQL {
        System.exit(0);
    }
 
+   
     //closing the connection
     try {
       conn.close();
