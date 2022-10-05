@@ -7,7 +7,7 @@ import java.io.IOException;
 CSCE 315
 9-27-2021 Lab
  */
-public class jdbcpostgreSQL {
+public class psqlCustomer {
 
   //Commands to run this script
   //This will compile all java files in this directory
@@ -44,9 +44,11 @@ public class jdbcpostgreSQL {
      System.out.println("Opened database successfully");
      String line = "";  
      String splitBy = ",";  
-     int order_number = 0;
      int customer_number = 0;
      String prev_name = "";
+     float total_cost = 0;
+     int i = 0;
+     boolean new_name = true;
 
 
      
@@ -61,20 +63,34 @@ public class jdbcpostgreSQL {
       while ((line = br.readLine()) != null)   {  
 
         String[] order_entry = line.split(splitBy);    // use comma as separator  
-        String sqlStatement = "INSERT INTO order_entries (order_number, customer, base, protein, guacamole, queso, chips_salsa, chips_queso, chips_guac, brownie, cookie, drink_16oz, drink_22oz, cost, date) VALUES (" + order_number + ", " + customer_number + ", \'" + order_entry[1] + "\', \'" + order_entry[2] + "\', \'" + order_entry[3] + "\', \'" + order_entry[4] + "\', \'" + order_entry[5] + "\', \'" + order_entry[6] + "\', \'" + order_entry[7] + "\', \'" + order_entry[8] + "\', \'" + order_entry[9] + "\', \'" + order_entry[10] + "\', \'" + order_entry[11] + "\', " + order_entry[12] + ", \'" + order_entry[13] + "\')";
 
+       // System.out.println(order_entry[12]);
         //System.out.println(sqlStatement);
 
         //System.out.println("before execute");
-        stmt.executeUpdate(sqlStatement); //executeUpdate to get arround execption
+        //stmt.executeUpdate(sqlStatement); //executeUpdate to get arround execption
         //System.out.println("after execute");
 
-        order_number++;
+        //base case
+        if (new_name) {
+            if (customer_number != 0) {
+                String sqlStatement = "INSERT INTO customer (customer_id, total_cost) VALUES (" + customer_number + ", " + total_cost + ")";
+                System.out.println(sqlStatement);
+                customer_number++;
+                total_cost = 0;
+                new_name = true;
+                i++;
+            } else {
+                total_cost = Float.parseFloat(order_entry[12]);
+            }
+        }
 
         if ( prev_name.equals( order_entry[0] )) {
-
+            total_cost += Float.parseFloat(order_entry[12]); //adding total cost 
+            new_name = false;
         } else {
-          customer_number++;
+
+          if (i == 3) {break;}
         }
 
         prev_name = order_entry[0];
