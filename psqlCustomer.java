@@ -55,47 +55,42 @@ public class psqlCustomer {
      try{
        //create a statement object
        Statement stmt = conn.createStatement();
-
-       //Running a query
-       //TODO: update the sql command here s
-      
       BufferedReader br = new BufferedReader(new FileReader("order_entries.csv"));  
       while ((line = br.readLine()) != null)   {  
 
         String[] order_entry = line.split(splitBy);    // use comma as separator  
 
-       // System.out.println(order_entry[12]);
-        //System.out.println(sqlStatement);
+        //BASE CASE
 
-        //System.out.println("before execute");
-        //stmt.executeUpdate(sqlStatement); //executeUpdate to get arround execption
-        //System.out.println("after execute");
+        if (customer_number == 0) {
+            total_cost = Float.parseFloat(order_entry[12]);
+        }
 
-        //base case
-        if (new_name) {
-            if (customer_number != 0) {
-                String sqlStatement = "INSERT INTO customer (customer_id, total_cost) VALUES (" + customer_number + ", " + total_cost + ")";
-                System.out.println(sqlStatement);
-                customer_number++;
-                total_cost = 0;
-                new_name = true;
-                i++;
+        //System.out.println("THE PREVIOUS NAME IS: " + prev_name);
+        if ( prev_name.equals( order_entry[0] )) {
+            total_cost += Float.parseFloat(order_entry[12]); //adding tot
+            //System.out.println("ADDING: " + order_entry[12]);
+            //System.out.println("total cost: " + total_cost);
+        } else {
+            String sqlStatement = "INSERT INTO customer (costumer_id, total_cost) VALUES (" + (customer_number) + ", " + total_cost + ")";
+            //System.out.println(sqlStatement);
+            stmt.executeUpdate(sqlStatement);
+            
+            if (customer_number == 0) {
+                total_cost = 0; 
             } else {
                 total_cost = Float.parseFloat(order_entry[12]);
             }
-        }
-
-        if ( prev_name.equals( order_entry[0] )) {
-            total_cost += Float.parseFloat(order_entry[12]); //adding total cost 
-            new_name = false;
-        } else {
-
-          if (i == 3) {break;}
+            customer_number++;
         }
 
         prev_name = order_entry[0];
 
       }
+            String sqlStatement = "INSERT INTO customer (customer_id, total_cost) VALUES (" + customer_number + ", " + total_cost + ")";
+            //System.out.println(sqlStatement);
+            stmt.executeUpdate(sqlStatement);
+
 
       br.close();
    } catch (Exception e){
