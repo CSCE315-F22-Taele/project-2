@@ -6,3 +6,5 @@ Team 22
 - Semion Dyadkin
 - Asger Larsen
 - Joshua Batac
+
+This repository displays the server and manager views consisting of the following views: login, order, manager, inventory management.
