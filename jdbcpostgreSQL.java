@@ -1,4 +1,3 @@
-package Connection;
 import java.sql.*;
 import java.io.BufferedReader;  
 import java.io.FileReader;  
@@ -67,7 +66,7 @@ public class jdbcpostgreSQL {
         //System.out.println(sqlStatement);
 
         //System.out.println("before execute");
-        stmt.executeUpdate(sqlStatement); //executeUpdate to get arround execption
+        //stmt.executeUpdate(sqlStatement); //executeUpdate to get arround execption
         //System.out.println("after execute");
 
         order_number++;
