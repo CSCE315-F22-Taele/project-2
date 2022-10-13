@@ -15,19 +15,18 @@ public class inventory_view extends JFrame{
         JFrame f = new JFrame("inventory GUI");
         f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        ArrayList<String[]> data = getData();
-        String[][] data_final;
-        data_final = data.stream().toArray(String[][]::new);
+        String[][] data = getData();
         
-        String columns[] = {"order_number", "customer", "base", "protein", "guacamole",  "queso", "chips_salsa", "chips_queso", "chips_guac", "brownie", "cookie", "drink_16oz", "drink_22oz", "cost date", "food_id", "food_name", "current_count", "max_count", "sell_price"};
+        String columns[] = {"food_id", "food_name", "current_count", "max_count", "sell_price"};
 
-        JTable table = new JTable(data_final,columns);
+        JTable table = new JTable(data,columns);
         table.setBounds(30,40,200,300);          
         JScrollPane sp=new JScrollPane(table);    
-        f.add(sp);          
+        f.add(sp);
+
         f.setSize(300,400);    
         f.setVisible(true);       
-
+        
     }
 
 /* getData() sends a jdbc query to the database to get the inventory data and return it
@@ -36,41 +35,52 @@ public class inventory_view extends JFrame{
  * @return {ArrayList<String[]>} data
  */
 
-    static ArrayList<String[]> getData() {
-        ArrayList<String[]> data;
-        data = new ArrayList<String[]>();
-        String[] entry = new String[20];
+    static String[][] getData() {
+        String[][] data = new String[0][0];
         Connection conn = null;
         String teamNumber = "22";
         String sectionNumber = "913";
         String dbName = "csce315_" + sectionNumber + "_" + teamNumber ;
-        String dbConnectionString = "jdbc:postgresql://csce-315-db.engr.tamu.edu/" + dbName;
+        String dbConnectionString = "jdbc.;postgresql://csce-315-db.engr.tamu.edu/" + dbName;
 
         //Connecting to the database
         try {
-            conn = DriverManager.getConnection(dbConnectionString, "csce315_913_larsen", "633001563");
-        } catch (Exception e) {
+            Class.forName("org.postgresql.Driver");
+            conn = DriverManager.getConnection("jdbc:postgresql://csce-315-db.engr.tamu.edu/csce315_913_22",
+               "csce315_913_larsen", "633001563");
+          } catch (Exception e) {
             e.printStackTrace();
             System.err.println(e.getClass().getName()+": "+e.getMessage());
             System.exit(0);
-        }
+          }
 
         System.out.println("Opened database successfully");
 
         try{
             //create a statement object
             Statement stmt = conn.createStatement();
-            String sqlStatement = "SELECT * FROM inventory;";
+
+            String sqlStatement = "SELECT count(food_id) AS count FROM inventory;";
+
             //send statement to DBMS
             ResultSet result = stmt.executeQuery(sqlStatement);
+            result.next();
+            int length = Integer.parseInt(result.getString("count"));
+            data = new String[length][5];
+
+            sqlStatement = "SELECT * FROM inventory;";
+            //send statement to DBMS
+            result = stmt.executeQuery(sqlStatement);
             
+            int entry_nr = 0;
             while (result.next()) {
-                entry[0] = result.getString("food_id")+"\n";
-                entry[1] = result.getString("food_name")+"\n";
-                entry[2] = result.getString("current_count")+"\n";
-                entry[3] = result.getString("max_count")+"\n";
-                entry[4] = result.getString("sell_price")+"\n";
-                data.add(entry);
+                data[entry_nr][0] = result.getString("food_id")+"\n";
+                data[entry_nr][1] = result.getString("food_name")+"\n";
+                data[entry_nr][2] = result.getString("current_count")+"\n";
+                data[entry_nr][3] = result.getString("max_count")+"\n";
+                data[entry_nr][4] = result.getString("sell_price")+"\n";
+                entry_nr++;
+                System.out.println(data[0]+","+data[1]+","+data[2]+","+data[3]+","+data[4]);
             }
         } catch(Exception e){
             JOptionPane.showMessageDialog(null,"Error accessing Database.");
