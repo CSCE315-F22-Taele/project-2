@@ -1,6 +1,7 @@
 
 import java.sql.*;
-import java.util.ArrayList;
+import java.awt.*;
+import java.awt.event.*;
 //import java.awt.event.*;
 import javax.swing.*;
 
@@ -8,12 +9,17 @@ import javax.swing.*;
  * @author Asger Schelde Larsen
  * 
  */
-public class inventory_view extends JFrame{
+public class inventory_view implements ActionListener{
+
+    static String[][] input_data;
 
     public static void main(String[] args) {
         // create a new frame
         JFrame f = new JFrame("inventory GUI");
         f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+        f.getContentPane().setLayout(new BoxLayout(f.getContentPane(), BoxLayout.Y_AXIS));
+
 
         String[][] data = getData();
         
@@ -22,9 +28,34 @@ public class inventory_view extends JFrame{
         JTable table = new JTable(data,columns);
         table.setBounds(30,40,200,300);          
         JScrollPane sp=new JScrollPane(table);    
-        f.add(sp);
+        f.getContentPane().add(sp);
 
-        f.setSize(300,400);    
+        JPanel p = new JPanel(new BorderLayout());
+
+        input_data = new String[1][5];
+        JTable input = new JTable(input_data,columns);
+        input.setBounds(30,40,200,300);
+        p.add(input, BorderLayout.PAGE_START);
+
+        JPanel pButtons = new JPanel(new FlowLayout());
+        JButton addItem = new JButton("Add Item");
+        JButton updateItem = new JButton("Update Item");
+        JButton deleteItem = new JButton("Delete Item");
+
+        inventory_view iv = new inventory_view();
+        addItem.addActionListener(iv);
+        updateItem.addActionListener(iv);
+        deleteItem.addActionListener(iv);
+
+        pButtons.add(addItem);
+        pButtons.add(updateItem);
+        pButtons.add(deleteItem);
+
+        p.add(pButtons, BorderLayout.CENTER);
+        
+        f.getContentPane().add(p);
+        f.setSize(300,400);
+        f.pack();
         f.setVisible(true);       
         
     }
@@ -80,11 +111,48 @@ public class inventory_view extends JFrame{
                 data[entry_nr][3] = result.getString("max_count")+"\n";
                 data[entry_nr][4] = result.getString("sell_price")+"\n";
                 entry_nr++;
-                System.out.println(data[0]+","+data[1]+","+data[2]+","+data[3]+","+data[4]);
             }
+            conn.close();
         } catch(Exception e){
             JOptionPane.showMessageDialog(null,"Error accessing Database.");
         }
         return data;
+    }
+
+    // if button is pressed
+    public void actionPerformed(ActionEvent e)
+    {
+        Connection conn = null;
+        String teamNumber = "22";
+        String sectionNumber = "913";
+        String dbName = "csce315_" + sectionNumber + "_" + teamNumber ;
+        String dbConnectionString = "jdbc.;postgresql://csce-315-db.engr.tamu.edu/" + dbName;
+
+        //Connecting to the database
+        try {
+            Class.forName("org.postgresql.Driver");
+            conn = DriverManager.getConnection("jdbc:postgresql://csce-315-db.engr.tamu.edu/csce315_913_22",
+               "csce315_913_larsen", "633001563");
+        } catch (Exception exception) {
+            exception.printStackTrace();
+            System.err.println(exception.getClass().getName()+": "+exception.getMessage());
+            System.exit(0);
+        }
+        
+        String s = e.getActionCommand();
+        if (s.equals("Add Item")) {
+            try {
+                Statement stmt = conn.createStatement();
+
+                String sqlStatement = "INSERT INTO inventory VALUES (" + input_data[0][0] + ",'" + input_data[0][1] + "'," + input_data[0][2] + "," + input_data[0][3] + "," + input_data[0][4] + ");";
+                System.out.println(sqlStatement);
+                //send statement to DBMS
+                stmt.executeUpdate(sqlStatement);
+            } catch (Exception exception) {
+                exception.printStackTrace();
+                System.err.println(exception.getClass().getName()+": "+exception.getMessage());
+                System.exit(0);
+            }
+        }
     }
 }
