@@ -59,6 +59,7 @@ public class inventory_view implements ActionListener{
         f.setSize(300,400);
         f.pack();
         f.setVisible(true);       
+        f.setBounds(100, 100, 768, 768);
         
     }
 
@@ -148,6 +149,61 @@ public class inventory_view implements ActionListener{
                 Statement stmt = conn.createStatement();
 
                 String sqlStatement = "INSERT INTO inventory VALUES (" + input_data[0][0] + ",'" + input_data[0][1] + "'," + input_data[0][2] + "," + input_data[0][3] + "," + input_data[0][4] + "," + input_data[0][5] + ");";
+                System.out.println(sqlStatement);
+                //send statement to DBMS
+                stmt.executeUpdate(sqlStatement);
+
+                updateTable();
+
+            } catch (Exception exception) {
+                exception.printStackTrace();
+                System.err.println(exception.getClass().getName()+": "+exception.getMessage());
+                System.exit(0);
+            }
+        } else if (s.equals("Update Item")) {
+            try {
+                Statement stmt = conn.createStatement();
+                boolean needForComma = false;
+
+                System.out.println("input length " + input_data.length);
+                for (int i = 0; i < input_data.length; i++) {
+                    System.out.println(input_data +" " + i + " :" + input_data[0][i]);
+                }
+
+                String sqlStatement = "UPDATE inventory SET ";
+                if (input_data[0][1] != null && !input_data[0][1].equals("")) {
+                    sqlStatement += "food_name = '" + input_data[0][1]+"'";
+                    needForComma = true;
+                }
+                if (input_data[0][2] != null && !input_data[0][1].equals("")) {
+                    if (needForComma) {
+                        sqlStatement += ", ";
+                    }
+                    sqlStatement += "current_count = " + input_data[0][2];
+                    needForComma = true;
+                }
+                if (input_data[0][3] != null && !input_data[0][1].equals("")) {
+                    if (needForComma) {
+                        sqlStatement += ", ";
+                    }
+                    sqlStatement += "max_count = " + input_data[0][3];
+                    needForComma = true;
+                }
+                if (input_data[0][4] != null && !input_data[0][1].equals("")) {
+                    if (needForComma) {
+                        sqlStatement += ", ";
+                    }
+                    sqlStatement += "sell_price = " + input_data[0][4];
+                    needForComma = true;
+                }
+                if (input_data[0][5] != null && !input_data[0][1].equals("")) {
+                    if (needForComma) {
+                        sqlStatement += ", ";
+                    }
+                    sqlStatement += "is_menu_item = '" + input_data[0][5] + "'";
+                    needForComma = true;
+                }
+                sqlStatement += " WHERE food_id = " + input_data[0][0] + ";";
                 System.out.println(sqlStatement);
                 //send statement to DBMS
                 stmt.executeUpdate(sqlStatement);
