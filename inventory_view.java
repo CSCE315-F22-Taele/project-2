@@ -4,7 +4,7 @@ import java.awt.*;
 import java.awt.event.*;
 //import java.awt.event.*;
 import javax.swing.*;
-
+import javax.swing.table.*;
 /* Inventory_view displays the inventory using java swing elements and jdbc queries to the database.
  * @author Asger Schelde Larsen
  * 
@@ -88,7 +88,7 @@ public class inventory_view implements ActionListener{
             System.exit(0);
           }
 
-        System.out.println("Opened database successfully");
+        //System.out.println("Opened database successfully");
 
         try{
             //create a statement object
@@ -149,7 +149,7 @@ public class inventory_view implements ActionListener{
                 Statement stmt = conn.createStatement();
 
                 String sqlStatement = "INSERT INTO inventory VALUES (" + input_data[0][0] + ",'" + input_data[0][1] + "'," + input_data[0][2] + "," + input_data[0][3] + "," + input_data[0][4] + "," + input_data[0][5] + ");";
-                System.out.println(sqlStatement);
+                //System.out.println(sqlStatement);
                 //send statement to DBMS
                 stmt.executeUpdate(sqlStatement);
 
@@ -199,7 +199,7 @@ public class inventory_view implements ActionListener{
                     needForComma = true;
                 }
                 sqlStatement += " WHERE food_id = " + input_data[0][0] + ";";
-                System.out.println(sqlStatement);
+                //System.out.println(sqlStatement);
                 //send statement to DBMS
                 stmt.executeUpdate(sqlStatement);
 
@@ -227,44 +227,49 @@ public class inventory_view implements ActionListener{
     }
 
     public void updateTable() {
-        f.dispose();
-        f = new JFrame("inventory GUI");
-        f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        f.getContentPane().setLayout(new BoxLayout(f.getContentPane(), BoxLayout.Y_AXIS));
+        String[][] data = getData();
+            String columns[] = {"food_id", "food_name", "current_count", "max_count", "sell_price"};
+            DefaultTableModel tableModel = new DefaultTableModel(data,columns);
+            table.setModel(tableModel);
+            tableModel.fireTableDataChanged();
+        // f.dispose();
+        // f = new JFrame("inventory GUI");
+        // f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        // f.getContentPane().setLayout(new BoxLayout(f.getContentPane(), BoxLayout.Y_AXIS));
 
-        data = getData();
+        // data = getData();
 
-        table = new JTable(data,columns);
-        table.setBounds(30,40,200,300);          
-        JScrollPane sp=new JScrollPane(table);    
-        f.getContentPane().add(sp);
+        // table = new JTable(data,columns);
+        // table.setBounds(30,40,200,300);          
+        // JScrollPane sp=new JScrollPane(table);    
+        // f.getContentPane().add(sp);
 
-        JPanel p = new JPanel(new BorderLayout());
+        // JPanel p = new JPanel(new BorderLayout());
 
-        input_data = new String[1][6];
-        JTable input = new JTable(input_data,columns);
-        input.setBounds(30,40,200,300);
-        p.add(input, BorderLayout.PAGE_START);
+        // input_data = new String[1][6];
+        // JTable input = new JTable(input_data,columns);
+        // input.setBounds(30,40,200,300);
+        // p.add(input, BorderLayout.PAGE_START);
 
-        JPanel pButtons = new JPanel(new FlowLayout());
-        JButton addItem = new JButton("Add Item");
-        JButton updateItem = new JButton("Update Item");
-        JButton deleteItem = new JButton("Delete Item");
+        // JPanel pButtons = new JPanel(new FlowLayout());
+        // JButton addItem = new JButton("Add Item");
+        // JButton updateItem = new JButton("Update Item");
+        // JButton deleteItem = new JButton("Delete Item");
 
-        inventory_view iv = new inventory_view();
-        addItem.addActionListener(iv);
-        updateItem.addActionListener(iv);
-        deleteItem.addActionListener(iv);
+        // inventory_view iv = new inventory_view();
+        // addItem.addActionListener(iv);
+        // updateItem.addActionListener(iv);
+        // deleteItem.addActionListener(iv);
 
-        pButtons.add(addItem);
-        pButtons.add(updateItem);
-        pButtons.add(deleteItem);
+        // pButtons.add(addItem);
+        // pButtons.add(updateItem);
+        // pButtons.add(deleteItem);
 
-        p.add(pButtons, BorderLayout.CENTER);
+        // p.add(pButtons, BorderLayout.CENTER);
         
-        f.getContentPane().add(p);
-        f.setSize(300,400);
-        f.pack();
-        f.setVisible(true);       
+        // f.getContentPane().add(p);
+        // f.setSize(300,400);
+        // f.pack();
+        // f.setVisible(true);       
     }
 }
