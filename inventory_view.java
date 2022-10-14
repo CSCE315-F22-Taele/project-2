@@ -59,6 +59,7 @@ public class inventory_view implements ActionListener{
         f.setSize(300,400);
         f.pack();
         f.setVisible(true);       
+        f.setBounds(100, 100, 768, 768);
         
     }
 
