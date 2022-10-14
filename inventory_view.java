@@ -165,11 +165,6 @@ public class inventory_view implements ActionListener{
                 Statement stmt = conn.createStatement();
                 boolean needForComma = false;
 
-                System.out.println("input length " + input_data.length);
-                for (int i = 0; i < input_data.length; i++) {
-                    System.out.println(input_data +" " + i + " :" + input_data[0][i]);
-                }
-
                 String sqlStatement = "UPDATE inventory SET ";
                 if (input_data[0][1] != null && !input_data[0][1].equals("")) {
                     sqlStatement += "food_name = '" + input_data[0][1]+"'";
@@ -208,6 +203,19 @@ public class inventory_view implements ActionListener{
                 //send statement to DBMS
                 stmt.executeUpdate(sqlStatement);
 
+                updateTable();
+
+            } catch (Exception exception) {
+                exception.printStackTrace();
+                System.err.println(exception.getClass().getName()+": "+exception.getMessage());
+                System.exit(0);
+            }
+        } else if ((s.equals("Delete Item"))) {
+            try {
+                Statement stmt = conn.createStatement();
+
+                String sqlStatement = "DELETE FROM inventory WHERE food_id = " + input_data[0][0] +";";
+                stmt.executeUpdate(sqlStatement);
                 updateTable();
 
             } catch (Exception exception) {
