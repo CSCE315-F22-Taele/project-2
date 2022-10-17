@@ -22,7 +22,7 @@ public class login_view implements ActionListener {
         //GUI
         JPanel panel = new JPanel();
         JFrame frame = new JFrame();
-        frame.setSize(350, 200);
+        frame.setSize(400, 200);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setVisible(true);
         frame.add(panel);
@@ -55,7 +55,11 @@ public class login_view implements ActionListener {
         success.setBounds(10, 110, 300, 25);
         panel.add(success);
 
+        //frame.pack();
+        panel.revalidate();
+        panel.repaint();
         frame.setVisible(true);
+        
     }
     public void actionPerformed(ActionEvent event){
 
@@ -77,6 +81,14 @@ public class login_view implements ActionListener {
     
 
         String user = userText.getText();
+        boolean id_flag = false; // false/odd is manager and true/even is server
+        String temp_user = user; 
+        try {  
+            if(Integer.parseInt(temp_user) % 2 == 0){
+                id_flag = true;
+            }
+          } catch(NumberFormatException e){  
+          }  
         if(!isNumeric(user)){
             success.setText("Username entered is incorrect");
             return;
@@ -85,9 +97,13 @@ public class login_view implements ActionListener {
         try{
             // while(true){
                 Statement stmt = conn.createStatement();
-                String sqlStatement = "SELECT password FROM server WHERE server_id = " + user;
+                String sqlStatement = "SELECT password FROM manager WHERE manager_id = " + user;
+                if(id_flag){
+                    sqlStatement = "SELECT password FROM server WHERE server_id = " + user;
+                }
                 ResultSet result = stmt.executeQuery(sqlStatement);
                 if(!result.next()){
+                    success.setText("Username entered is incorrect");
                     return;
                 }
                 String pass = result.getString("password");
