@@ -26,17 +26,23 @@ public class inventory_view implements ActionListener{
 
 
         data = getData();
-
         table = new JTable(data,columns);
         table.setBounds(30,40,200,300);          
         JScrollPane sp=new JScrollPane(table);    
         f.getContentPane().add(sp);
+        DefaultTableModel tableModel = new DefaultTableModel(data,columns){
+            public boolean isCellEditable(int row, int column){
+                return false; // This causes all cells to be not editable
+            }
+        };
+        table.setModel(tableModel);
+        tableModel.fireTableDataChanged();    
 
         JPanel p = new JPanel(new BorderLayout());
 
         input_data = new String[1][6];
         JTable input = new JTable(input_data,columns);
-        input.setBounds(30,40,200,300);
+        input.setBounds(30,100,200,300);
         p.add(input, BorderLayout.PAGE_START);
 
         JPanel pButtons = new JPanel(new FlowLayout());
@@ -54,7 +60,6 @@ public class inventory_view implements ActionListener{
         pButtons.add(deleteItem);
 
         p.add(pButtons, BorderLayout.CENTER);
-        
         f.getContentPane().add(p);
         f.setSize(300,400);
         f.pack();
@@ -206,7 +211,11 @@ public class inventory_view implements ActionListener{
 
     public void updateTable() {
         String[][] data = getData();
-        DefaultTableModel tableModel = new DefaultTableModel(data,columns);
+        DefaultTableModel tableModel = new DefaultTableModel(data,columns){
+            public boolean isCellEditable(int row, int column){
+                return false; // This causes all cells to be not editable
+            }
+        };
         table.setModel(tableModel);
         tableModel.fireTableDataChanged();     
     }
