@@ -102,7 +102,7 @@ public class inventory_view implements ActionListener{
             int length = Integer.parseInt(result.getString("count"));
             data = new String[length][6];
 
-            sqlStatement = "SELECT * FROM inventory;";
+            sqlStatement = "SELECT * FROM inventory ORDER BY food_id ASC";
             //send statement to DBMS
             result = stmt.executeQuery(sqlStatement);
             
@@ -163,47 +163,25 @@ public class inventory_view implements ActionListener{
         } else if (s.equals("Update Item")) {
             try {
                 Statement stmt = conn.createStatement();
-                boolean needForComma = false;
+                
+                //checkInputTypeOk();
+                
+                String sqlStatement = makeQuery();
+                System.out.println(sqlStatement);
 
-                String sqlStatement = "UPDATE inventory SET ";
-                if (input_data[0][1] != null && !input_data[0][1].equals("")) {
-                    sqlStatement += "food_name = '" + input_data[0][1]+"'";
-                    needForComma = true;
-                }
-                if (input_data[0][2] != null && !input_data[0][1].equals("")) {
-                    if (needForComma) {
-                        sqlStatement += ", ";
-                    }
-                    sqlStatement += "current_count = " + input_data[0][2];
-                    needForComma = true;
-                }
-                if (input_data[0][3] != null && !input_data[0][1].equals("")) {
-                    if (needForComma) {
-                        sqlStatement += ", ";
-                    }
-                    sqlStatement += "max_count = " + input_data[0][3];
-                    needForComma = true;
-                }
-                if (input_data[0][4] != null && !input_data[0][1].equals("")) {
-                    if (needForComma) {
-                        sqlStatement += ", ";
-                    }
-                    sqlStatement += "sell_price = " + input_data[0][4];
-                    needForComma = true;
-                }
-                if (input_data[0][5] != null && !input_data[0][1].equals("")) {
-                    if (needForComma) {
-                        sqlStatement += ", ";
-                    }
-                    sqlStatement += "is_menu_item = '" + input_data[0][5] + "'";
-                    needForComma = true;
-                }
-                sqlStatement += " WHERE food_id = " + input_data[0][0] + ";";
-                //System.out.println(sqlStatement);
-                //send statement to DBMS
-                stmt.executeUpdate(sqlStatement);
+                //Test if given food_id exists in inventory
+                if (checkIdExists(stmt) <= 0) {
+                    JOptionPane.showMessageDialog(null,"ID does not exist");
 
-                updateTable();
+                //if any input was entered.
+                } else if (!sqlStatement.isEmpty()) {
+                    //send statement to DBMS
+                    stmt.executeUpdate(sqlStatement);
+                    updateTable();
+                } else {
+                    // No updates where given in fields
+                    JOptionPane.showMessageDialog(null,"No fields to update.");
+                }
 
             } catch (Exception exception) {
                 exception.printStackTrace();
@@ -228,48 +206,80 @@ public class inventory_view implements ActionListener{
 
     public void updateTable() {
         String[][] data = getData();
-            String columns[] = {"food_id", "food_name", "current_count", "max_count", "sell_price"};
-            DefaultTableModel tableModel = new DefaultTableModel(data,columns);
-            table.setModel(tableModel);
-            tableModel.fireTableDataChanged();
-        // f.dispose();
-        // f = new JFrame("inventory GUI");
-        // f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        // f.getContentPane().setLayout(new BoxLayout(f.getContentPane(), BoxLayout.Y_AXIS));
+        DefaultTableModel tableModel = new DefaultTableModel(data,columns);
+        table.setModel(tableModel);
+        tableModel.fireTableDataChanged();     
+    }
 
-        // data = getData();
+    public String makeQuery() {
+        //Make query using input data
+        boolean needForComma = false;
+        String sqlStatement = "UPDATE inventory SET ";
+        if (input_data[0][1] != null && !input_data[0][1].isEmpty()) {
+            sqlStatement += "food_name = '" + input_data[0][1]+"'";
+            needForComma = true;
+        }
+        if (input_data[0][2] != null && !input_data[0][2].isEmpty()) {
+            if (needForComma) {
+                sqlStatement += ", ";
+            }
+            sqlStatement += "current_count = " + input_data[0][2];
+            needForComma = true;
+        }
+        if (input_data[0][3] != null && !input_data[0][3].isEmpty()) {
+            if (needForComma) {
+                sqlStatement += ", ";
+            }
+            sqlStatement += "max_count = " + input_data[0][3];
+            needForComma = true;
+        }
+        if (input_data[0][4] != null && !input_data[0][4].isEmpty()) {
+            if (needForComma) {
+                sqlStatement += ", ";
+            }
+            sqlStatement += "sell_price = " + input_data[0][4];
+            needForComma = true;
+        }
+        if (input_data[0][5] != null && !input_data[0][5].isEmpty()) {
+            if (needForComma) {
+                sqlStatement += ", ";
+            }
+            sqlStatement += "is_menu_item = '" + input_data[0][5] + "'";
+            needForComma = true;
+        }
+        sqlStatement += " WHERE food_id = " + input_data[0][0] + ";";
 
-        // table = new JTable(data,columns);
-        // table.setBounds(30,40,200,300);          
-        // JScrollPane sp=new JScrollPane(table);    
-        // f.getContentPane().add(sp);
+        //return statement if any input was entered
+        if (needForComma) {
+            return sqlStatement;
+        } else {
+            return "";
+        }
+    }
 
-        // JPanel p = new JPanel(new BorderLayout());
+    public int checkIdExists(Statement stmt) {
+        String checkIdExistsStmt = "SELECT count(*) FROM inventory WHERE food_id = " + input_data[0][0];
+            try {
+                ResultSet result = stmt.executeQuery(checkIdExistsStmt);
+                result.next();
+                return Integer.parseInt(result.getString("count"));
+            } catch (Exception e) {
+                e.printStackTrace();
+                System.err.println(e.getClass().getName()+": "+e.getMessage());
+                System.exit(0);
+            }
+            return -1;
+    }
 
-        // input_data = new String[1][6];
-        // JTable input = new JTable(input_data,columns);
-        // input.setBounds(30,40,200,300);
-        // p.add(input, BorderLayout.PAGE_START);
+    public boolean checkInputTypeOk() {
+        for (int i = 0; i < input_data[0].length; i++) {
+            //Check ID is not null or empty
+            //
+            if (input_data[0][i] == null ) {
 
-        // JPanel pButtons = new JPanel(new FlowLayout());
-        // JButton addItem = new JButton("Add Item");
-        // JButton updateItem = new JButton("Update Item");
-        // JButton deleteItem = new JButton("Delete Item");
+            }
+        }
 
-        // inventory_view iv = new inventory_view();
-        // addItem.addActionListener(iv);
-        // updateItem.addActionListener(iv);
-        // deleteItem.addActionListener(iv);
-
-        // pButtons.add(addItem);
-        // pButtons.add(updateItem);
-        // pButtons.add(deleteItem);
-
-        // p.add(pButtons, BorderLayout.CENTER);
-        
-        // f.getContentPane().add(p);
-        // f.setSize(300,400);
-        // f.pack();
-        // f.setVisible(true);       
+        return false;
     }
 }
