@@ -4,7 +4,7 @@ import java.awt.*;
 import java.awt.event.*;
 //import java.awt.event.*;
 import javax.swing.*;
-
+import javax.swing.table.*;
 /* Inventory_view displays the inventory using java swing elements and jdbc queries to the database.
  * @author Asger Schelde Larsen
  * 
@@ -12,27 +12,29 @@ import javax.swing.*;
 public class inventory_view implements ActionListener{
 
     static String[][] input_data;
+    static String[][] data;
+    static String columns[] = {"ID", "Name", "Current Count", "Maximum Count", "Sell Price", "Is Menu Item"};
+    static JFrame f = new JFrame("inventory GUI");
+    static JTable table;
 
     public static void main(String[] args) {
         // create a new frame
-        JFrame f = new JFrame("inventory GUI");
+        
         f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         f.getContentPane().setLayout(new BoxLayout(f.getContentPane(), BoxLayout.Y_AXIS));
 
 
-        String[][] data = getData();
-        
-        String columns[] = {"food_id", "food_name", "current_count", "max_count", "sell_price"};
+        data = getData();
 
-        JTable table = new JTable(data,columns);
+        table = new JTable(data,columns);
         table.setBounds(30,40,200,300);          
         JScrollPane sp=new JScrollPane(table);    
         f.getContentPane().add(sp);
 
         JPanel p = new JPanel(new BorderLayout());
 
-        input_data = new String[1][5];
+        input_data = new String[1][6];
         JTable input = new JTable(input_data,columns);
         input.setBounds(30,40,200,300);
         p.add(input, BorderLayout.PAGE_START);
@@ -86,7 +88,7 @@ public class inventory_view implements ActionListener{
             System.exit(0);
           }
 
-        System.out.println("Opened database successfully");
+        //System.out.println("Opened database successfully");
 
         try{
             //create a statement object
@@ -98,7 +100,7 @@ public class inventory_view implements ActionListener{
             ResultSet result = stmt.executeQuery(sqlStatement);
             result.next();
             int length = Integer.parseInt(result.getString("count"));
-            data = new String[length][5];
+            data = new String[length][6];
 
             sqlStatement = "SELECT * FROM inventory;";
             //send statement to DBMS
@@ -111,6 +113,7 @@ public class inventory_view implements ActionListener{
                 data[entry_nr][2] = result.getString("current_count")+"\n";
                 data[entry_nr][3] = result.getString("max_count")+"\n";
                 data[entry_nr][4] = result.getString("sell_price")+"\n";
+                data[entry_nr][5] = result.getString("is_menu_item")+"\n";
                 entry_nr++;
             }
             conn.close();
@@ -145,15 +148,128 @@ public class inventory_view implements ActionListener{
             try {
                 Statement stmt = conn.createStatement();
 
-                String sqlStatement = "INSERT INTO inventory VALUES (" + input_data[0][0] + ",'" + input_data[0][1] + "'," + input_data[0][2] + "," + input_data[0][3] + "," + input_data[0][4] + ");";
-                System.out.println(sqlStatement);
+                String sqlStatement = "INSERT INTO inventory VALUES (" + input_data[0][0] + ",'" + input_data[0][1] + "'," + input_data[0][2] + "," + input_data[0][3] + "," + input_data[0][4] + "," + input_data[0][5] + ");";
+                //System.out.println(sqlStatement);
                 //send statement to DBMS
                 stmt.executeUpdate(sqlStatement);
+
+                updateTable();
+
+            } catch (Exception exception) {
+                exception.printStackTrace();
+                System.err.println(exception.getClass().getName()+": "+exception.getMessage());
+                System.exit(0);
+            }
+        } else if (s.equals("Update Item")) {
+            try {
+                Statement stmt = conn.createStatement();
+                boolean needForComma = false;
+
+                String sqlStatement = "UPDATE inventory SET ";
+                if (input_data[0][1] != null) {
+                    sqlStatement += "food_name = '" + input_data[0][1]+"'";
+                    needForComma = true;
+                }
+                if (input_data[0][2] != null) {
+                    if (needForComma) {
+                        sqlStatement += ", ";
+                    }
+                    sqlStatement += "current_count = " + input_data[0][2];
+                    needForComma = true;
+                }
+                if (input_data[0][3] != null) {
+                    if (needForComma) {
+                        sqlStatement += ", ";
+                    }
+                    sqlStatement += "max_count = " + input_data[0][3];
+                    needForComma = true;
+                }
+                if (input_data[0][4] != null) {
+                    if (needForComma) {
+                        sqlStatement += ", ";
+                    }
+                    sqlStatement += "sell_price = " + input_data[0][4];
+                    needForComma = true;
+                }
+                if (input_data[0][5] != null) {
+                    if (needForComma) {
+                        sqlStatement += ", ";
+                    }
+                    sqlStatement += "is_menu_item = '" + input_data[0][5] + "'";
+                    needForComma = true;
+                }
+                sqlStatement += " WHERE food_id = " + input_data[0][0] + ";";
+                //System.out.println(sqlStatement);
+                //send statement to DBMS
+                stmt.executeUpdate(sqlStatement);
+
+                updateTable();
+
+            } catch (Exception exception) {
+                exception.printStackTrace();
+                System.err.println(exception.getClass().getName()+": "+exception.getMessage());
+                System.exit(0);
+            }
+        } else if ((s.equals("Delete Item"))) {
+            try {
+                Statement stmt = conn.createStatement();
+
+                String sqlStatement = "DELETE FROM inventory WHERE food_id = " + input_data[0][0] +";";
+                stmt.executeUpdate(sqlStatement);
+                updateTable();
+
             } catch (Exception exception) {
                 exception.printStackTrace();
                 System.err.println(exception.getClass().getName()+": "+exception.getMessage());
                 System.exit(0);
             }
         }
+    }
+
+    public void updateTable() {
+        String[][] data = getData();
+            String columns[] = {"food_id", "food_name", "current_count", "max_count", "sell_price"};
+            DefaultTableModel tableModel = new DefaultTableModel(data,columns);
+            table.setModel(tableModel);
+            tableModel.fireTableDataChanged();
+        // f.dispose();
+        // f = new JFrame("inventory GUI");
+        // f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        // f.getContentPane().setLayout(new BoxLayout(f.getContentPane(), BoxLayout.Y_AXIS));
+
+        // data = getData();
+
+        // table = new JTable(data,columns);
+        // table.setBounds(30,40,200,300);          
+        // JScrollPane sp=new JScrollPane(table);    
+        // f.getContentPane().add(sp);
+
+        // JPanel p = new JPanel(new BorderLayout());
+
+        // input_data = new String[1][6];
+        // JTable input = new JTable(input_data,columns);
+        // input.setBounds(30,40,200,300);
+        // p.add(input, BorderLayout.PAGE_START);
+
+        // JPanel pButtons = new JPanel(new FlowLayout());
+        // JButton addItem = new JButton("Add Item");
+        // JButton updateItem = new JButton("Update Item");
+        // JButton deleteItem = new JButton("Delete Item");
+
+        // inventory_view iv = new inventory_view();
+        // addItem.addActionListener(iv);
+        // updateItem.addActionListener(iv);
+        // deleteItem.addActionListener(iv);
+
+        // pButtons.add(addItem);
+        // pButtons.add(updateItem);
+        // pButtons.add(deleteItem);
+
+        // p.add(pButtons, BorderLayout.CENTER);
+        
+        // f.getContentPane().add(p);
+        // f.setSize(300,400);
+        // f.pack();
+        // f.setVisible(true);       
     }
 }
