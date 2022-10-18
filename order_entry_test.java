@@ -21,10 +21,11 @@ class Demo extends JFrame implements ActionListener {
     int next_food_id = 0; //seasonal item food ID
     int order_id = 0;
     int customer_id = -1;
-    double curr_total = 0.0;
+    double curr_total = 0.0; //current price of order
 
     JTextField total = new JTextField();
     JRadioButton same_customer = new JRadioButton("Same Customer?");
+    JButton back_to_login = new JButton("Back to login");
     ButtonGroup base = new ButtonGroup();
     ButtonGroup protein = new ButtonGroup();
 
@@ -32,6 +33,7 @@ class Demo extends JFrame implements ActionListener {
     String[][] menu_items = new String[0][0];
     JRadioButton[] buttons = new JRadioButton[0];
 
+    
     DecimalFormat df = new DecimalFormat("0.00");
 
 
@@ -84,10 +86,29 @@ class Demo extends JFrame implements ActionListener {
 
     }//end of arr_to_buttons
 
-    void bottom_buttons() {
+    void misc_buttons() {
+
+        back_to_login.setBounds(590,45,120,30);
+        this.add(back_to_login);
+
+        back_to_login.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+
+            Demo f_ = new Demo(); 
+            f_.setBounds(100, 100, 768, 768); 
+            f_.setTitle("CABO GRILL ORDER ENTRY"); 
+            f_.setVisible(true); 
+            setVisible(false);
+            }
+        });
+
+
         same_customer.setBounds(30,640,200,50);
         this.add(same_customer);
         //same customer
+
+
+
         //send Order
         JButton sendOrder = new JButton("Send Order");
         sendOrder.setBounds(30,690,120,30);
@@ -178,6 +199,7 @@ class Demo extends JFrame implements ActionListener {
             AbstractButton button = buttons.nextElement();
 
             if (button.isSelected()) {
+                //JOptionPane.showMessageDialog(null,button.getText());
                 return button.getText();
             }
         }
@@ -212,6 +234,10 @@ class Demo extends JFrame implements ActionListener {
         if (order_items.length == 0) {return null;}
         int ordernumber_stmt = Integer.parseInt( order_date_num + order_id);
         order_id++;
+
+        base_ = base_.replace("\n","");
+        protein_ = protein_.replace("\n", "");
+
         if (buttons.length > 13) {
             ret = "INSERT INTO order_entries (order_number, customer, base, protein, guacamole, queso, chips_salsa, chips_queso, chips_guac, brownie, cookie, drink_16oz, drink_22oz, cost, date) VALUES ( " + ordernumber_stmt + "," + customer_id + ",\'" + base_ + "\',\'" + protein_  + "\', \'" + order_items[4] + "\', \'" + order_items[6] + "\', \'" + order_items[6] + "\', \'" + order_items[7] + "\', \'" + order_items[8] + "\', \'" + order_items[9] + "\', \'" + order_items[10] + "\', \'" + order_items[11] + "\', \'" + order_items[12] + "\', " + df.format(curr_total) + ", \'" + date + "\', \'" + order_items[13] + "\')";
         } else {
@@ -220,7 +246,7 @@ class Demo extends JFrame implements ActionListener {
 
         base.clearSelection();
         protein.clearSelection();
-        JOptionPane.showMessageDialog(null,("Total: " + curr_total));
+        JOptionPane.showMessageDialog(null,"Total: " + df.format(curr_total));
         curr_total = 0;
         total.setText("Total: " + df.format(curr_total));
 
@@ -423,7 +449,7 @@ class Demo extends JFrame implements ActionListener {
         this.setLayout(null);
         base_setup();
         arr_to_buttons(menu_items);
-        bottom_buttons();
+        misc_buttons();
     }
 
     public Demo() {
@@ -431,7 +457,7 @@ class Demo extends JFrame implements ActionListener {
         this.setLayout(null);
         base_setup();
         arr_to_buttons(menu_items);
-        bottom_buttons();
+        misc_buttons();
     }//end of public demo
 
     @Override
