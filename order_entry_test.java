@@ -8,7 +8,6 @@ import java.util.Enumeration;
 import javax.swing.ButtonGroup;
 
 
-
 /*
  *  @joshbatac
  *  javac *java && java -cp ".:postgresql-42.2.8.jar" order_entry_test
@@ -22,10 +21,10 @@ class Demo extends JFrame implements ActionListener {
     int order_id = 0;
     int customer_id = -1;
     double curr_total = 0.0; //current price of order
-
+    JTable j;
     JTextField total = new JTextField();
     JRadioButton same_customer = new JRadioButton("Same Customer?");
-    JButton back_to_login = new JButton("Back to login");
+    JButton back_to_login = new JButton("Sign Out");
     ButtonGroup base = new ButtonGroup();
     ButtonGroup protein = new ButtonGroup();
 
@@ -33,11 +32,9 @@ class Demo extends JFrame implements ActionListener {
     String[][] menu_items = new String[0][0];
     JRadioButton[] buttons = new JRadioButton[0];
 
-    
     DecimalFormat df = new DecimalFormat("0.00");
 
     
-
     void base_setup() {
         JRadioButton burrito = new JRadioButton();
         burrito.setText("Burrito");
@@ -94,18 +91,9 @@ class Demo extends JFrame implements ActionListener {
 
         back_to_login.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                
-                /* 
-                Demo f_ = new Demo(); 
-                f_.setBounds(100, 100, 768, 768); 
-                f_.setTitle("CABO GRILL ORDER ENTRY"); 
-                f_.setVisible(true); 
-                setVisible(false);
-                */
 
-                Thread t1 = new Thread(new login_view().new RunnableImpl());
-                t1.start();
-                setVisible(false);
+                new login_view();
+                dispose();
 
             }
         });
@@ -458,6 +446,9 @@ class Demo extends JFrame implements ActionListener {
         base_setup();
         arr_to_buttons(menu_items);
         misc_buttons();
+        JScrollPane sp = new JScrollPane();
+        this.add(sp);
+
     }
 
     public Demo() {
@@ -502,6 +493,6 @@ class Demo extends JFrame implements ActionListener {
 
 public class order_entry_test {
     public static void main(String args[]) {
-        new Demo(); 
+        new Demo();
     }//end main
 }//end Class
