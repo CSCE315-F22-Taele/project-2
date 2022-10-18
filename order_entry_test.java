@@ -33,7 +33,6 @@ class Demo extends JFrame implements ActionListener {
     JRadioButton[] buttons = new JRadioButton[0];
 
     DecimalFormat df = new DecimalFormat("0.00");
-
     
     void base_setup() {
         JRadioButton burrito = new JRadioButton();
@@ -152,7 +151,10 @@ class Demo extends JFrame implements ActionListener {
         addSeasonal.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 String seasonal_name = JOptionPane.showInputDialog("Name of Seasonal Item: ");
-
+                if (seasonal_name.isBlank()) {
+                    JOptionPane.showMessageDialog(null, "Not a Valid Name");
+                    return;
+                }
                 for (int i = 0; i < menu_items.length; i++) {
                     if (menu_items[i][0] == null) {break;}
                     String temp = menu_items[i][0];
@@ -232,7 +234,7 @@ class Demo extends JFrame implements ActionListener {
 
         base_ = base_.replace("\n","");
         protein_ = protein_.replace("\n", "");
-
+    
         if (buttons.length > 13) {
             ret = "INSERT INTO order_entries (order_number, customer, base, protein, guacamole, queso, chips_salsa, chips_queso, chips_guac, brownie, cookie, drink_16oz, drink_22oz, cost, date) VALUES ( " + ordernumber_stmt + "," + customer_id + ",\'" + base_ + "\',\'" + protein_  + "\', \'" + order_items[4] + "\', \'" + order_items[6] + "\', \'" + order_items[6] + "\', \'" + order_items[7] + "\', \'" + order_items[8] + "\', \'" + order_items[9] + "\', \'" + order_items[10] + "\', \'" + order_items[11] + "\', \'" + order_items[12] + "\', " + df.format(curr_total) + ", \'" + date + "\', \'" + order_items[13] + "\')";
         } else {
@@ -392,6 +394,8 @@ class Demo extends JFrame implements ActionListener {
         }
 
         if (isempty) { return; }
+
+        
         Connection conn = null;
         String teamNumber = "22";
         String sectionNumber = "913";
@@ -416,6 +420,18 @@ class Demo extends JFrame implements ActionListener {
             Statement stmt = conn.createStatement();
 
             stmt.executeUpdate(sqlStatement); //executeUpdate to get arround execption
+
+            for (int i = 0; i < order_items.length; i++) {
+                if (order_items[i] == 1) {
+                    String column_name = menu_items[i][0];
+                    column_name = column_name.replace("\n", "");
+                    
+                    String SQLstmt_ = "UPDATE inventory SET current_count = current_count - 1 WHERE food_name = \'"+ column_name + "\'";
+                    System.out.println(SQLstmt_);
+                    stmt.executeUpdate(SQLstmt_);
+
+                }
+            }
         } catch (Exception e_){
             e_.printStackTrace();
             System.err.println(e_.getClass().getName()+": "+e_.getMessage());
