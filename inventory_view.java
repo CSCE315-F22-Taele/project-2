@@ -102,7 +102,7 @@ public class inventory_view implements ActionListener{
             int length = Integer.parseInt(result.getString("count"));
             data = new String[length][6];
 
-            sqlStatement = "SELECT * FROM inventory;";
+            sqlStatement = "SELECT * FROM inventory ORDER BY food_id ASC";
             //send statement to DBMS
             result = stmt.executeQuery(sqlStatement);
             
@@ -163,6 +163,7 @@ public class inventory_view implements ActionListener{
         } else if (s.equals("Update Item")) {
             try {
                 Statement stmt = conn.createStatement();
+<<<<<<< HEAD
                 boolean needForComma = false;
 
                 String sqlStatement = "UPDATE inventory SET ";
@@ -204,6 +205,27 @@ public class inventory_view implements ActionListener{
                 stmt.executeUpdate(sqlStatement);
 
                 updateTable();
+=======
+                
+                //checkInputTypeOk();
+                
+                String sqlStatement = makeQuery();
+                System.out.println(sqlStatement);
+
+                //Test if given food_id exists in inventory
+                if (checkIdExists(stmt) <= 0) {
+                    JOptionPane.showMessageDialog(null,"ID does not exist");
+
+                //if any input was entered.
+                } else if (!sqlStatement.isEmpty()) {
+                    //send statement to DBMS
+                    stmt.executeUpdate(sqlStatement);
+                    updateTable();
+                } else {
+                    // No updates where given in fields
+                    JOptionPane.showMessageDialog(null,"No fields to update.");
+                }
+>>>>>>> 753d07189cf78b64a293b5097ac73cdee9acb948
 
             } catch (Exception exception) {
                 exception.printStackTrace();
@@ -228,6 +250,7 @@ public class inventory_view implements ActionListener{
 
     public void updateTable() {
         String[][] data = getData();
+<<<<<<< HEAD
             String columns[] = {"food_id", "food_name", "current_count", "max_count", "sell_price"};
             DefaultTableModel tableModel = new DefaultTableModel(data,columns);
             table.setModel(tableModel);
@@ -271,5 +294,82 @@ public class inventory_view implements ActionListener{
         // f.setSize(300,400);
         // f.pack();
         // f.setVisible(true);       
+=======
+        DefaultTableModel tableModel = new DefaultTableModel(data,columns);
+        table.setModel(tableModel);
+        tableModel.fireTableDataChanged();     
+    }
+
+    public String makeQuery() {
+        //Make query using input data
+        boolean needForComma = false;
+        String sqlStatement = "UPDATE inventory SET ";
+        if (input_data[0][1] != null && !input_data[0][1].isEmpty()) {
+            sqlStatement += "food_name = '" + input_data[0][1]+"'";
+            needForComma = true;
+        }
+        if (input_data[0][2] != null && !input_data[0][2].isEmpty()) {
+            if (needForComma) {
+                sqlStatement += ", ";
+            }
+            sqlStatement += "current_count = " + input_data[0][2];
+            needForComma = true;
+        }
+        if (input_data[0][3] != null && !input_data[0][3].isEmpty()) {
+            if (needForComma) {
+                sqlStatement += ", ";
+            }
+            sqlStatement += "max_count = " + input_data[0][3];
+            needForComma = true;
+        }
+        if (input_data[0][4] != null && !input_data[0][4].isEmpty()) {
+            if (needForComma) {
+                sqlStatement += ", ";
+            }
+            sqlStatement += "sell_price = " + input_data[0][4];
+            needForComma = true;
+        }
+        if (input_data[0][5] != null && !input_data[0][5].isEmpty()) {
+            if (needForComma) {
+                sqlStatement += ", ";
+            }
+            sqlStatement += "is_menu_item = '" + input_data[0][5] + "'";
+            needForComma = true;
+        }
+        sqlStatement += " WHERE food_id = " + input_data[0][0] + ";";
+
+        //return statement if any input was entered
+        if (needForComma) {
+            return sqlStatement;
+        } else {
+            return "";
+        }
+    }
+
+    public int checkIdExists(Statement stmt) {
+        String checkIdExistsStmt = "SELECT count(*) FROM inventory WHERE food_id = " + input_data[0][0];
+            try {
+                ResultSet result = stmt.executeQuery(checkIdExistsStmt);
+                result.next();
+                return Integer.parseInt(result.getString("count"));
+            } catch (Exception e) {
+                e.printStackTrace();
+                System.err.println(e.getClass().getName()+": "+e.getMessage());
+                System.exit(0);
+            }
+            return -1;
+    }
+
+    public boolean checkInputTypeOk() {
+        for (int i = 0; i < input_data[0].length; i++) {
+            //Check ID is not null or empty
+            //
+            if (input_data[0][i] == null ) {
+
+            }
+        }
+
+        return false;
+>>>>>>> 753d07189cf78b64a293b5097ac73cdee9acb948
     }
 }
