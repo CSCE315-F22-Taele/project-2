@@ -11,15 +11,19 @@ import javax.swing.table.*;
  */
 public class inventory_view implements ActionListener{
 
-    static String[][] input_data;
-    static String[][] data;
-    static String columns[] = {"ID", "Name", "Current Count", "Maximum Count", "Sell Price", "Is Menu Item"};
-    static JFrame f = new JFrame("inventory GUI");
-    static JTable table;
+    private static String[][] input_data;
+    private static String[][] data;
+    private static String columns[] = {"ID", "Name", "Current Count", "Maximum Count", "Sell Price", "Is Menu Item"};
+    private static JFrame f = new JFrame("inventory GUI");
+    private static JTable table;
+    private static int loop = 0;
 
     public static void main(String[] args) {
+        new inventory_view();
+    }
+
+    public inventory_view() {
         // create a new frame
-        
         f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         f.getContentPane().setLayout(new BoxLayout(f.getContentPane(), BoxLayout.Y_AXIS));
@@ -47,12 +51,11 @@ public class inventory_view implements ActionListener{
         JButton back = new JButton("Back");
         JButton stockReport = new JButton("Show Stock Report");
 
-        inventory_view iv = new inventory_view();
-        addItem.addActionListener(iv);
-        updateItem.addActionListener(iv);
-        deleteItem.addActionListener(iv);
-        back.addActionListener(iv);
-        stockReport.addActionListener(iv);
+        addItem.addActionListener(this);
+        updateItem.addActionListener(this);
+        deleteItem.addActionListener(this);
+        back.addActionListener(this);
+        stockReport.addActionListener(this);
 
         pButtons.add(addItem);
         pButtons.add(updateItem);
@@ -152,7 +155,8 @@ public class inventory_view implements ActionListener{
         
         String s = e.getActionCommand();
         if (s.equals("Back")) {
-            
+            new login_view();
+            f.dispose();
         } else if (s.equals("Add Item")) {
             try {
                 Statement stmt = conn.createStatement();
