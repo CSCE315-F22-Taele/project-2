@@ -36,6 +36,7 @@ class Demo extends JFrame implements ActionListener {
     
     DecimalFormat df = new DecimalFormat("0.00");
 
+    
 
     void base_setup() {
         JRadioButton burrito = new JRadioButton();
@@ -93,12 +94,19 @@ class Demo extends JFrame implements ActionListener {
 
         back_to_login.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
+                
+                /* 
+                Demo f_ = new Demo(); 
+                f_.setBounds(100, 100, 768, 768); 
+                f_.setTitle("CABO GRILL ORDER ENTRY"); 
+                f_.setVisible(true); 
+                setVisible(false);
+                */
 
-            Demo f_ = new Demo(); 
-            f_.setBounds(100, 100, 768, 768); 
-            f_.setTitle("CABO GRILL ORDER ENTRY"); 
-            f_.setVisible(true); 
-            setVisible(false);
+                Thread t1 = new Thread(new login_view().new RunnableImpl());
+                t1.start();
+                setVisible(false);
+
             }
         });
 
@@ -458,7 +466,10 @@ class Demo extends JFrame implements ActionListener {
         base_setup();
         arr_to_buttons(menu_items);
         misc_buttons();
-    }//end of public demo
+        this.setBounds(100, 100, 768, 768); 
+        this.setTitle("CABO GRILL ORDER ENTRY"); 
+        this.setVisible(true); 
+    }
 
     @Override
     public void actionPerformed(ActionEvent e) {
@@ -491,11 +502,6 @@ class Demo extends JFrame implements ActionListener {
 
 public class order_entry_test {
     public static void main(String args[]) {
-
-        Demo f = new Demo(); 
-        f.setBounds(100, 100, 768, 768); 
-        f.setTitle("CABO GRILL ORDER ENTRY"); 
-        f.setVisible(true); 
-
+        new Demo(); 
     }//end main
 }//end Class
