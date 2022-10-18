@@ -103,9 +103,8 @@ class Demo extends JFrame implements ActionListener {
                 setVisible(false);
                 */
 
-                Thread t1 = new Thread(new login_view().new RunnableImpl());
-                t1.start();
-                setVisible(false);
+                new login_view();
+                dispose();
 
             }
         });
@@ -502,6 +501,6 @@ class Demo extends JFrame implements ActionListener {
 
 public class order_entry_test {
     public static void main(String args[]) {
-        new Demo(); 
+        new Demo();
     }//end main
 }//end Class
