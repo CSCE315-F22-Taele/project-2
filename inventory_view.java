@@ -16,7 +16,7 @@ public class inventory_view implements ActionListener{
     private static String columns[] = {"ID", "Name", "Current Count", "Maximum Count", "Sell Price", "Is Menu Item"};
     private static JFrame f = new JFrame("inventory GUI");
     private static JTable table;
-    private static int loop = 0;
+    private static JTable input;
 
     public static void main(String[] args) {
         new inventory_view();
@@ -39,7 +39,7 @@ public class inventory_view implements ActionListener{
         JPanel p = new JPanel(new BorderLayout());
 
         input_data = new String[1][6];
-        JTable input = new JTable(input_data,columns);
+        input = new JTable(input_data,columns);
         input.setBounds(30,40,200,300);
         p.add(input, BorderLayout.PAGE_START);
 
@@ -155,7 +155,7 @@ public class inventory_view implements ActionListener{
         
         String s = e.getActionCommand();
         if (s.equals("Back")) {
-            new login_view();
+            new manager_view();
             f.dispose();
         } else if (s.equals("Add Item")) {
             try {
@@ -215,7 +215,9 @@ public class inventory_view implements ActionListener{
         } else if ((s.equals("Delete Item"))) {
             try {
                 Statement stmt = conn.createStatement();
-                if (checkInputTypeOk()) {
+                try {
+                    Integer.parseInt(input_data[0][0]);
+
                     String sqlStatement = "DELETE FROM inventory WHERE food_id = " + input_data[0][0];
                     if (checkIdExists(stmt) >= 0) {
                         stmt.executeUpdate(sqlStatement);
@@ -223,8 +225,8 @@ public class inventory_view implements ActionListener{
                     } else {
                         JOptionPane.showMessageDialog(null,"ID does not exist.");
                     }
-                } else {
-                    JOptionPane.showMessageDialog(null,"Wrong type used in field.");
+                } catch(Exception ex) {
+                    JOptionPane.showMessageDialog(null,"ID must be a number");
                 }
 
             } catch (Exception exception) {
@@ -502,7 +504,7 @@ public class inventory_view implements ActionListener{
         }
         //Check is_menu_item is t or f
         if (input_data[0][5] != null && !input_data[0][5].isEmpty()) {
-            if (input_data[0][0] == "t" || input_data[0][0] == "f") {
+            if (input_data[0][5] == "t" || input_data[0][5] == "f") {
             } else {
                 return false;
             }
