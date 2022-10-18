@@ -63,50 +63,6 @@ public class login_view implements ActionListener {
         
     }
 
-    private class RunnableImpl implements Runnable {
- 
-        public void run()
-        {
-            //GUI
-            JPanel panel = new JPanel();
-            JFrame frame = new JFrame();
-            frame.setSize(350, 200);
-            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            frame.setVisible(true);
-            frame.add(panel);
-
-            panel.setLayout(null);
-            username = new JLabel("Username");
-            username.setBounds(10, 20, 80, 25);
-            panel.add(username);
-
-            userText = new JTextField(20);
-            userText.setBounds(100, 25, 165, 20);
-            panel.add(userText);
-
-
-            password = new JLabel("Password");
-            password.setBounds(10, 50, 80, 25);
-            panel.add(password);
-            passText = new JPasswordField();
-            passText.setBounds(100, 50, 165, 20);
-            panel.add(passText);
-            
-
-            //button
-            button = new JButton("Login");
-            button.setBounds(10, 80, 80, 25);
-            button.addActionListener(new login_view());
-            panel.add(button);
-
-            success = new JLabel("");
-            success.setBounds(10, 110, 300, 25);
-            panel.add(success);
-
-            frame.setVisible(true);
-        }
-    }
-
     public void actionPerformed(ActionEvent event){
 
         //building sql connection 
