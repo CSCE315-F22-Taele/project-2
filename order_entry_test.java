@@ -446,8 +446,8 @@ class Demo extends JFrame implements ActionListener {
         base_setup();
         arr_to_buttons(menu_items);
         misc_buttons();
-        JScrollPane sp = new JScrollPane();
-        this.add(sp);
+        JScrollPane pane = new JScrollPane(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        this.setContentPane(pane);
 
     }
 
