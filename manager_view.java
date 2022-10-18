@@ -5,10 +5,9 @@ import java.sql.*;
 import javax.swing.table.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-
+import java.time.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -21,29 +20,38 @@ import javax.swing.JTable;
  *
  */
 
-
 public class manager_view extends JFrame implements ActionListener {
+
+    private enum Actions {
+        BTN2,
+        GOODBYE
+    }
 
     private static final long serialVersionUID = 1L;
 
-    private JLabel introLbl, lbl1, lbl2, lbl3, txtfld1, txtfld2, txtfld3;
-//    private JTextField txtfld1, txtfld2, txtfld3;
+    private JLabel introLbl, lbl1, lbl2, lbl3, lbl4, txtfld1, txtfld2, txtfld4;
+    private JTextField txtfld3;
     private JButton btn1;
     private JButton btn2;
     private JTextArea txtArea1;
 
 
-    public static void main(String[] args) {
+        manager_view() {
 
         // make window object
-        manager_view GUI = new manager_view();
-        GUI.init();
+//        manager_view GUI = new manager_view();
+//        GUI.init();
+        this.init();
 
         // set window object size
-        GUI.setSize(760, 768);
-        GUI.setTitle("MANAGER VIEW");
-        GUI.setVisible(true);
-        GUI.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+//        GUI.setSize(760, 768);
+//        GUI.setTitle("MANAGER VIEW");
+//        GUI.setVisible(true);
+//        GUI.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        this.setSize(760, 768);
+        this.setTitle("MANAGER VIEW");
+        this.setVisible(true);
+        this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
     }
 
     public void init() {
@@ -75,72 +83,103 @@ public class manager_view extends JFrame implements ActionListener {
 
         // create button for all current menu items in the inventory
         btn1 = new JButton("VIEW CURRENT ITEMS");
-        btn1.setBounds(35, 200, 350, 30);
+        btn1.setBounds(35, 150, 350, 30);
         btn1.addActionListener(this);
+
+        String[] items = {
+                "Chicken",
+                "Steak",
+                "Beef",
+                "Roasted_Vegetables",
+                "chips_queso",
+                "chips_quac",
+                "chips_salsa",
+                "16oz_drink",
+                "22oz_drink",
+                "cookie",
+                "brownie"
+        };
 
 
         // third label
-        lbl3 = new JLabel("Label 3");
-        lbl3.setBounds(35, 285, 150, 20);
-        txtfld3 = new JLabel();
-        txtfld3.setText("Enter date:");
+        lbl3 = new JLabel("Enter start date in YYYY-MM-DD format: ");
+        lbl3.setBounds(35, 285, 250, 20);
+        txtfld3 = new JTextField();
+        LocalDate dt = java.time.LocalDate.now();
+        txtfld3.setText(dt.toString());
+        txtfld3.setBounds(260, 285, 100, 20);
+
 
         // create button for specific item and specific date
-        btn2 = new JButton("Calculate specified results.");
-        btn2.setBounds(35, 325, 350, 30);
-        btn2.addActionListener(this);
+//        btn2 = new JButton("Sum of Chicken");
+//        btn2.setBounds(35, 360, 350, 30);
+//        btn2.setActionCommand(Actions.BTN2.name());
+//        btn2.addActionListener(this);
+//        btn2.addActionListener(this);
+        // "SELECT * FROM order_entries WHERE date BETWEEN 'start' AND 'end';"
+        // second label
+        lbl4 = new JLabel("TOTAL CHICKEN SOLD IN DATE RANGE:");
+        lbl4.setBounds(35, 490, 250, 20);
+        txtfld4 = new JLabel();
+        txtfld4.setText("$" + getChickenTotal());
+        txtfld4.setBounds(270, 490, 100, 20);
 
         // add to pane
         pane.add(introLbl);
         pane.add(lbl1);
         pane.add(lbl2);
         pane.add(lbl3);
+        pane.add(lbl4);
 
         pane.add(txtfld1);
         pane.add(txtfld2);
         pane.add(txtfld3);
+        pane.add(txtfld4);
 
         pane.add(btn1);
-        pane.add(btn2);
+//        pane.add(btn2);
 
     }
 
 
     // prompts user that the analysis is completed
-
     @Override
     public void actionPerformed(ActionEvent e) {
+        if (e.getActionCommand() != Actions.BTN2.name()) {
+//            lbl4 = new JLabel("TOTAL SALES FOR CHICKEN:");
+//            lbl4.setBounds(35, 400, 150, 20);
+//            txtfld4 = new JLabel();
+//            txtfld4.setText("$" + getChickenTotal());
+//        }
+//        else {
+            // frame
+            JFrame f;
+            // Table
+            JTable j;
 
-//        JOptionPane.showMessageDialog(this, "ANALYSIS COMPLETED");
+            f = new JFrame();
 
-        // frame
-        JFrame f;
-        // Table
-        JTable j;
+            // Frame Title
+            f.setTitle("TODAY'S TRANSACTIONS: " + java.time.LocalDate.now());
 
-        f = new JFrame();
+            // pull all the menu items from the inventory to be displayed
+            String[][] inv = getInventory();
 
-        // Frame Title
-        f.setTitle("TODAY'S TRANSACTIONS: " + java.time.LocalDate.now());
-
-        // pull all the menu items from the inventory to be displayed
-        String[][] inv = getInventory();
-
-        // Column Names
-        String[] columnNames = { "food_id", "food_name", "current_count", "max_count", "sell_price" };
+            // Column Names
+            String[] columnNames = {"food_id", "food_name", "current_count", "max_count", "sell_price" };
 
 
-        // Initializing the JTable
-        j = new JTable(inv, columnNames);
-        j.setBounds(30, 40, 200, 500);
+            // Initializing the JTable
+            j = new JTable(inv, columnNames);
+            j.setBounds(30, 40, 200, 500);
 
-        // adding it to JScrollPane
-        JScrollPane sp = new JScrollPane(j);
-        f.add(sp);
-        // Frame Size
-        f.setSize(760, 375);
-        f.setVisible(true);
-
+            // adding it to JScrollPane
+            JScrollPane sp = new JScrollPane(j);
+            f.add(sp);
+            // Frame Size
+            f.setSize(760, 375);
+            f.setVisible(true);
+        }
     }
 
     // helper function to get the inventory
@@ -202,6 +241,8 @@ public class manager_view extends JFrame implements ActionListener {
         return inv;
     }
 
+
+
     // helper function to get the total sum of entire business
     static double getTotalSum() {
         double totalSum = 0.0;
@@ -242,6 +283,50 @@ public class manager_view extends JFrame implements ActionListener {
             JOptionPane.showMessageDialog(null,"Error accessing Database.");
         }
         return totalSum;
+    }
+
+    // helper function to get the sum of profits in today's operating hours
+    static double getChickenTotal() {
+        double sumChicken = 0.0;
+        // establish database setup information
+        Connection conn = null;
+        String teamNumber = "22";
+        String sectionNumber = "913";
+        String dbName = "csce315_" + sectionNumber + "_" + teamNumber ;
+        String dbConnectionString = "jdbc.;postgresql://csce-315-db.engr.tamu.edu/" + dbName;
+
+        // Connecting to the database
+        try {
+            Class.forName("org.postgresql.Driver");
+            conn = DriverManager.getConnection("jdbc:postgresql://csce-315-db.engr.tamu.edu/csce315_913_22",
+                    "csce315_913_kutsch", "830002561");
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.err.println(e.getClass().getName()+": "+e.getMessage());
+            System.exit(0);
+        }
+
+//        System.out.println("Opened database successfully");
+
+        try{
+            // create a statement object
+            Statement stmt = conn.createStatement();
+
+            // will not work if there are no orders in today's date
+            // SO YOU MUST INSERT AN ORDER ENTRY BEFORE RUNNING THE MANAGER VIEW PAGE
+            ResultSet res = stmt.executeQuery("SELECT SUM(cost) FROM order_entries WHERE protein='Chicken' AND date BETWEEN NOW() - INTERVAL '24 HOURS' AND NOW();");
+
+            // pull into table
+            while (res.next()) {
+                double tmp = res.getFloat(1);
+                sumChicken = sumChicken + tmp;
+            }
+            sumChicken = Math.round(sumChicken*100.0)/100.0;
+//            System.out.println(sumToday);
+        } catch(Exception e){
+            JOptionPane.showMessageDialog(null,"Error accessing Database.");
+        }
+        return sumChicken;
     }
 
 
@@ -335,5 +420,8 @@ public class manager_view extends JFrame implements ActionListener {
         return sumToday;
     }
 
-}
+    public static void main(String[] args) {
+        new manager_view();
+    }
 
+}
