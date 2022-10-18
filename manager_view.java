@@ -26,9 +26,10 @@ public class manager_view extends JFrame implements ActionListener {
 
     private static final long serialVersionUID = 1L;
 
-    private JLabel introLbl, lbl1, lbl2, txtfld1, txtfld2;
+    private JLabel introLbl, lbl1, lbl2, lbl3, txtfld1, txtfld2, txtfld3;
 //    private JTextField txtfld1, txtfld2, txtfld3;
     private JButton btn1;
+    private JButton btn2;
     private JTextArea txtArea1;
 
 
@@ -70,23 +71,37 @@ public class manager_view extends JFrame implements ActionListener {
         txtfld2 = new JLabel();
         txtfld2.setText("$" + getTotalSum());
 
-
         txtfld2.setBounds(250, 85, 500, 30);
 
-        // create button for charts and analysis
+        // create button for all current menu items in the inventory
         btn1 = new JButton("VIEW CURRENT ITEMS");
         btn1.setBounds(35, 200, 350, 30);
         btn1.addActionListener(this);
+
+
+        // third label
+        lbl3 = new JLabel("Label 3");
+        lbl3.setBounds(35, 285, 150, 20);
+        txtfld3 = new JLabel();
+        txtfld3.setText("Enter date:");
+
+        // create button for specific item and specific date
+        btn2 = new JButton("Calculate specified results.");
+        btn2.setBounds(35, 325, 350, 30);
+        btn2.addActionListener(this);
 
         // add to pane
         pane.add(introLbl);
         pane.add(lbl1);
         pane.add(lbl2);
+        pane.add(lbl3);
 
         pane.add(txtfld1);
         pane.add(txtfld2);
+        pane.add(txtfld3);
 
         pane.add(btn1);
+        pane.add(btn2);
 
     }
 
@@ -259,7 +274,53 @@ public class manager_view extends JFrame implements ActionListener {
 
             // will not work if there are no orders in today's date
             // SO YOU MUST INSERT AN ORDER ENTRY BEFORE RUNNING THE MANAGER VIEW PAGE
-            ResultSet res = stmt.executeQuery("SELECT SUM(cost) FROM order_entries WHERE cast(date as Date) = cast(getDate() as Date);");
+            ResultSet res = stmt.executeQuery("SELECT SUM(cost) FROM order_entries WHERE date BETWEEN NOW() - INTERVAL '24 HOURS' AND NOW();");
+
+            // pull into table
+            while (res.next()) {
+                double tmp = res.getFloat(1);
+                sumToday = sumToday + tmp;
+            }
+            sumToday = Math.round(sumToday*100.0)/100.0;
+//            System.out.println(sumToday);
+        } catch(Exception e){
+            JOptionPane.showMessageDialog(null,"Error accessing Database.");
+        }
+        return sumToday;
+    }
+
+
+
+    // helper function to pull the revenues for specific item on specific date
+    static double querySpecificItem() {
+        double sumToday = 0.0;
+        // establish database setup information
+        Connection conn = null;
+        String teamNumber = "22";
+        String sectionNumber = "913";
+        String dbName = "csce315_" + sectionNumber + "_" + teamNumber ;
+        String dbConnectionString = "jdbc.;postgresql://csce-315-db.engr.tamu.edu/" + dbName;
+
+        // Connecting to the database
+        try {
+            Class.forName("org.postgresql.Driver");
+            conn = DriverManager.getConnection("jdbc:postgresql://csce-315-db.engr.tamu.edu/csce315_913_22",
+                    "csce315_913_kutsch", "830002561");
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.err.println(e.getClass().getName()+": "+e.getMessage());
+            System.exit(0);
+        }
+
+//        System.out.println("Opened database successfully");
+
+        try{
+            // create a statement object
+            Statement stmt = conn.createStatement();
+
+            // will not work if there are no orders in today's date
+            // SO YOU MUST INSERT AN ORDER ENTRY BEFORE RUNNING THE MANAGER VIEW PAGE
+            ResultSet res = stmt.executeQuery("SELECT SUM(cost) FROM order_entries WHERE date BETWEEN NOW() - INTERVAL '24 HOURS' AND NOW();");
 
             // pull into table
             while (res.next()) {

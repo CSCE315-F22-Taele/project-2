@@ -1,9 +1,13 @@
-
 import java.sql.*;
+import java.text.DecimalFormat;
 import java.awt.event.*;
 import javax.swing.*;   
 import java.time.format.DateTimeFormatter;  
 import java.time.LocalDateTime; 
+import java.util.Enumeration;
+import javax.swing.ButtonGroup;
+
+
 
 /*
  *  @joshbatac
@@ -11,234 +15,206 @@ import java.time.LocalDateTime;
  * 
  */
 
-class Demo extends JFrame { 
-  
-  //misc buttons
-  JButton sendOrder;
-  JButton reset;
-  JRadioButton same_customer;
 
-  //base
-  ButtonGroup grp_base; 
-  JRadioButton jrb_burrito; 
-  JRadioButton jrb_bowl;
+class Demo extends JFrame implements ActionListener { 
 
-  //protein
-  ButtonGroup grp_protein; 
-  JRadioButton jrb_chicken; 
-  JRadioButton jrb_steak;
-  JRadioButton jrb_vegetable;
-  JLabel label_chicken;
-  JLabel label_steak;
-  JLabel label_vegetable;
+    int next_food_id = 0; //seasonal item food ID
+    int order_id = 0;
+    int customer_id = -1;
+    double curr_total = 0.0; //current price of order
 
-  //sauce
-  JRadioButton jrb_queso; 
-  JRadioButton jrb_guac;
-  JLabel label_queso;
-  JLabel label_guac;
+    JTextField total = new JTextField();
+    JRadioButton same_customer = new JRadioButton("Same Customer?");
+    JButton back_to_login = new JButton("Back to login");
+    ButtonGroup base = new ButtonGroup();
+    ButtonGroup protein = new ButtonGroup();
 
-  //chips
-  JRadioButton jrb_c_salsa; 
-  JRadioButton jrb_c_queso;
-  JRadioButton jrb_c_guac;
-  JLabel label_c_salsa;
-  JLabel label_c_queso;
-  JLabel label_c_guac;
-  
-  //dessert
-  JRadioButton jrb_brownie; 
-  JRadioButton jrb_cookie;
-  JLabel label_brownie;
-  JLabel label_cookie;
+    Integer[]order_items = new Integer[0];
+    String[][] menu_items = new String[0][0];
+    JRadioButton[] buttons = new JRadioButton[0];
 
-  //drinks
-  JRadioButton jrb_small_drink; 
-  JRadioButton jrb_large_drink; 
-  JLabel label_small_drink;
-  JLabel label_large_drink;
+    
+    DecimalFormat df = new DecimalFormat("0.00");
 
 
-  public Demo() { 
-      this.setLayout(null); 
+    void base_setup() {
+        JRadioButton burrito = new JRadioButton();
+        burrito.setText("Burrito");
+        burrito.setBounds(50,30,120,50);
+        this.add(burrito);
 
-      //send order to db
-      sendOrder = new JButton("Send Order"); 
-      sendOrder.setBounds(50,690 , 120, 30); 
-      this.add(sendOrder); 
+        JRadioButton bowl = new JRadioButton();
+        bowl.setText("Bowl");
+        bowl.setBounds(50,60,120,50);
+        this.add(bowl);
+
+        base.add(burrito);
+        base.add(bowl);
+    } 
+
+    void arr_to_buttons(String[][] str_arr) {
+
+        int y_val = 120;
+        int protein_space = 0;
+        buttons = new JRadioButton[str_arr.length];
+        for (int i = 0; i < str_arr.length; i++) {
+            if (str_arr[i][0] == null) { break; }
+            System.out.println("adding " + str_arr[i][0]);
+            JRadioButton temp = new JRadioButton(str_arr[i][0]);
+            JLabel temp_ = new JLabel(str_arr[i][1]);
+            temp.addActionListener(this);
+            this.add(temp);
+
+            if (str_arr[i][2].equals("true\n")) {
+                protein.add(temp);
+            } else {
+                protein_space ++;
+            }
+
+            if (protein_space == 1) {
+                protein_space++;
+                y_val += 30;
+            }
+
+            temp.setBounds(50,y_val,200,50);
+            temp_.setBounds(630,y_val,120,50);
+            this.add(temp_);
+            
+            buttons[i] = temp;
+            y_val += 30;
+        }   
+
+    }//end of arr_to_buttons
+
+    void misc_buttons() {
+
+        back_to_login.setBounds(590,45,120,30);
+        this.add(back_to_login);
+
+        back_to_login.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+
+            Demo f_ = new Demo(); 
+            f_.setBounds(100, 100, 768, 768); 
+            f_.setTitle("CABO GRILL ORDER ENTRY"); 
+            f_.setVisible(true); 
+            setVisible(false);
+            }
+        });
 
 
-      //reset radio buttons
-      reset = new JButton("Reset");
-      reset.setBounds(200,690,120,30);
-      this.add(reset);
+        same_customer.setBounds(30,640,200,50);
+        this.add(same_customer);
+        //same customer
 
-      reset.addActionListener(new ActionListener() {
-        public void actionPerformed(ActionEvent e) {
-          grp_base.clearSelection();
-          grp_protein.clearSelection();
-          jrb_queso.setSelected(false);
-          jrb_guac.setSelected(false);
-          jrb_brownie.setSelected(false);
-          jrb_cookie.setSelected(false); 
-          jrb_c_salsa.setSelected(false);
-          jrb_c_queso.setSelected(false);
-          jrb_c_guac.setSelected(false);
-          jrb_small_drink.setSelected(false);
-          jrb_large_drink.setSelected(false);
 
-          
+
+        //send Order
+        JButton sendOrder = new JButton("Send Order");
+        sendOrder.setBounds(30,690,120,30);
+
+        sendOrder.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                String base_choice = getSelectedButtonText(base);
+                String protein_choice = getSelectedButtonText(protein);
+                String sqlStatement = sqlStatementFunction(base_choice, protein_choice);
+                sendData(sqlStatement);
+
+            }
+        });
+
+
+        //Total
+        total.setEditable(false);
+        total.setText("Total: " + df.format(curr_total));
+        total.setBounds(600,690,100,30);
+        this.add(total);
+        this.add(sendOrder);
+
+        //clear
+        JButton clear = new JButton("Clear");
+        clear.setBounds(150, 690,120,30);
+        this.add(clear);
+
+        clear.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                base.clearSelection();
+                protein.clearSelection();
+                curr_total = 0;
+                total.setText("Total: " + df.format(curr_total));
+
+                for (int i = 0; i < buttons.length; i++) {
+                    if (buttons[i] == null) { break; }
+                    buttons[i].setSelected(false);
+                    
+                }
+            }
+        });
+
+        JButton addSeasonal = new JButton("Add Seasonal Item");
+        addSeasonal.setBounds(270,690,200,30);
+        this.add(addSeasonal);
+        addSeasonal.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                String seasonal_name = JOptionPane.showInputDialog("Name of Seasonal Item: ");
+
+                for (int i = 0; i < menu_items.length; i++) {
+                    if (menu_items[i][0] == null) {break;}
+                    String temp = menu_items[i][0];
+
+                    if (temp.trim().equals(seasonal_name.trim())) { //trim() because menu_items[i][0] has \n at the end
+                        JOptionPane.showMessageDialog(null,"Menu Item Already Exists.");
+                        return;
+                    }
+
+                }
+
+                String seasonal_price = JOptionPane.showInputDialog("Price of \"" + seasonal_name + "\"(x.xx): ");
+                try {
+                    Double.parseDouble(seasonal_price);
+                } catch (NumberFormatException e_) {
+                    JOptionPane.showMessageDialog(null,"Not a Valid Price.");
+                    return;
+                }
+
+                String max_count = JOptionPane.showInputDialog("Max Count of \"" + seasonal_name + "\"(non-neg int): ");
+
+                if (  Integer.parseInt(max_count) < 0) {
+                    JOptionPane.showMessageDialog(null,"Not a Valid Count.");
+                    return;
+                }
+
+                addSeasonalItem(seasonal_name,seasonal_price,max_count);
+
+                JOptionPane.showMessageDialog(null,"Added \"" + seasonal_name + "\": $" + seasonal_price + " to menu.");
+            }
+        });
+
+
+
+    }
+
+    String getSelectedButtonText(ButtonGroup buttonGroup) {
+        for (Enumeration<AbstractButton> buttons = buttonGroup.getElements(); buttons.hasMoreElements();) {
+            AbstractButton button = buttons.nextElement();
+
+            if (button.isSelected()) {
+                //JOptionPane.showMessageDialog(null,button.getText());
+                return button.getText();
+            }
         }
-      });
 
-      //base
-      jrb_burrito = new JRadioButton(); //creating buttons
-      jrb_bowl = new JRadioButton();
-      grp_base = new ButtonGroup(); //button group to only allow one choice 
+        return "N/A";
+    }
 
-      jrb_burrito.setText("Burrito");
-      jrb_bowl.setText("Bowl");
-      jrb_burrito.setBounds(50,30,120,50);
-      jrb_bowl.setBounds(50,60,120,50);
+    String sqlStatementFunction(String base_, String protein_) {
 
-      this.add(jrb_burrito);
-      this.add(jrb_bowl);
-      grp_base.add(jrb_burrito);
-      grp_base.add(jrb_bowl);
+        //0-4 are proteins, everything after is something to add
 
-      //protein
-      jrb_chicken = new JRadioButton(); //creating buttons
-      jrb_steak = new JRadioButton();
-      jrb_vegetable = new JRadioButton();
-      grp_protein = new ButtonGroup(); //button group to only allow one choice 
-
-      label_chicken = new JLabel("$7.29"); //creating prices 
-      label_steak = new JLabel("$8.29");
-      label_vegetable = new JLabel("$7.29");
-
-      jrb_chicken.setText("Chicken");
-      jrb_steak.setText("Steak");
-      jrb_vegetable.setText("Vegetable");
-
-      jrb_chicken.setBounds(50,120,120,50);
-      jrb_steak.setBounds(50,150,120,50);
-      jrb_vegetable.setBounds(50,180,120,50);
-
-      label_chicken.setBounds(630,120,120,50);
-      label_steak.setBounds(630,150,120,50);
-      label_vegetable.setBounds(630,180,120,50);
-
-      this.add(jrb_chicken);
-      this.add(jrb_steak);
-      this.add(jrb_vegetable);
-      grp_protein.add(jrb_chicken);
-      grp_protein.add(jrb_steak);
-      grp_protein.add(jrb_vegetable);
-      this.add(label_chicken);
-      this.add(label_steak);
-      this.add(label_vegetable);
-
-      //sauce
-      jrb_queso = new JRadioButton(); //creating new buttons
-      jrb_guac = new JRadioButton();
-
-      jrb_queso.setText("Queso");
-      jrb_guac.setText("Guac");
-
-      label_queso = new JLabel("$2.00"); //prices
-      label_guac = new JLabel("$2.00");
-
-      jrb_queso.setBounds(50,240,120,50);
-      jrb_guac.setBounds(50,270,120,50);
-      label_queso.setBounds(630,240,120,50);
-      label_guac.setBounds(630, 270, 120, 50);
-
-      this.add(jrb_queso);
-      this.add(jrb_guac);
-      this.add(label_queso);
-      this.add(label_guac);
-
-      //chips
-      jrb_c_salsa = new JRadioButton(); //creating new buttons
-      jrb_c_queso = new JRadioButton();
-      jrb_c_guac = new JRadioButton();
-
-      label_c_salsa = new JLabel("$2.19"); //prices 
-      label_c_queso = new JLabel("$3.64");
-      label_c_guac = new JLabel("$3.69");
-
-      jrb_c_salsa.setText("Chips and Salsa");
-      jrb_c_queso.setText("Chips and Queso");
-      jrb_c_guac.setText("Chips and Guac");
-
-      jrb_c_salsa.setBounds(50,330,200,50);
-      jrb_c_queso.setBounds(50,360,200,50);
-      jrb_c_guac.setBounds(50,390,200,50);
-      
-      label_c_salsa.setBounds(630,330,200,50);
-      label_c_queso.setBounds(630,360,200,50);
-      label_c_guac.setBounds(630,390,200,50);
-
-
-      this.add(jrb_c_salsa);
-      this.add(jrb_c_queso);
-      this.add(jrb_c_guac);
-
-      this.add(label_c_salsa);
-      this.add(label_c_queso);
-      this.add(label_c_guac);
-
-      //dessert 
-      jrb_brownie = new JRadioButton(); //creating new buttons
-      jrb_cookie = new JRadioButton();
-
-      label_brownie = new JLabel("$1.99"); //prices 
-      label_cookie = new JLabel("$1.99");
-
-      jrb_brownie.setText("Brownie");
-      jrb_cookie.setText("Cookie");
-
-      jrb_brownie.setBounds(50,450,120,50);
-      jrb_cookie.setBounds(50,480,120,50);
-
-      label_brownie.setBounds(630,450,200,50);
-      label_cookie.setBounds(630,480,200,50);
-
-      this.add(jrb_brownie);
-      this.add(jrb_cookie);
-
-      this.add(label_brownie);
-      this.add(label_cookie);
-
-      //drinks
-      jrb_small_drink = new JRadioButton(); //creating buttons 
-      jrb_large_drink = new JRadioButton(); 
-
-      jrb_small_drink.setText("16oz"); //prices 
-      jrb_large_drink.setText("22oz"); 
-
-      label_small_drink = new JLabel("$2.25");
-      label_large_drink = new JLabel("$2.45");
-
-      jrb_small_drink.setBounds(50, 570, 120, 50); 
-      jrb_large_drink.setBounds(50, 600, 120, 50); 
-
-      label_small_drink.setBounds(630,570,200,50);
-      label_large_drink.setBounds(630,600,200,50);
-
-      this.add(jrb_small_drink); 
-      this.add(jrb_large_drink); 
-      this.add(label_small_drink);
-      this.add(label_large_drink);
-
-      //check if same customer is getting another order 
-      same_customer = new JRadioButton(); 
-      same_customer.setText("Same Customer?");
-      same_customer.setBounds(50,630,200,50);
-      this.add(same_customer);
-
-      //Calculation of price and PSQL communication 
-      sendOrder.addActionListener(new ActionListener() { 
+        /*
+        Guacamole, Queso, Chips_Salsa, Chips_Queso, Chips_Guac, Brownie, Cookie, 16, 22, cost, date, seasonal items
+        4          5      6            7            8           9        10      11  12  13    14    15+
+        */
 
 
         //finding time for dt column 
@@ -250,129 +226,276 @@ class Demo extends JFrame {
         //used for unique order number
         DateTimeFormatter dtf_order= DateTimeFormatter.ofPattern("MMddYYYY");  
         String order_date_num = dtf_order.format(now);
-        
-        
 
-        int ordernumber = 0;
-        int customer = -1; //very first customer will always never have same customer selected
-        public void actionPerformed(ActionEvent e) { 
-          //order number 
-          double cost = 0.0;
-          //base
-          String base = "N/A";
-          if (jrb_burrito.isSelected()) { base = "Burrito"; } 
-          else if (jrb_bowl.isSelected()) { base = "Bowl";} 
-          grp_base.clearSelection();
-          
-          //protein
-          String protein = "N/A";
-          if (jrb_chicken.isSelected()) { protein = "Chicken"; cost += 7.29;} 
-          else if (jrb_steak.isSelected()) { protein = "Steak"; cost += 8.29;}
-          else if (jrb_vegetable.isSelected()) {protein = "Vegetable"; cost += 7.29;} 
-          grp_protein.clearSelection();
+        if (!(same_customer.isSelected())) {
+            customer_id++;
+        }
+        String ret = "";
+        if (order_items.length == 0) {return null;}
+        int ordernumber_stmt = Integer.parseInt( order_date_num + order_id);
+        order_id++;
 
-          //sauce
-          String queso = "0";
-          String guac = "0";  
-          if (jrb_queso.isSelected()) { queso = "1"; cost += 2.00; } 
-          if (jrb_guac.isSelected()) { guac = "1"; cost += 2.00; } 
-          jrb_queso.setSelected(false);
-          jrb_guac.setSelected(false);
+        base_ = base_.replace("\n","");
+        protein_ = protein_.replace("\n", "");
 
-          //chips
-          String c_salsa = "0";
-          String c_queso = "0";
-          String c_guac = "0";  
-          if (jrb_c_salsa.isSelected()) { c_salsa = "0"; cost += 2.19;}
-          if (jrb_c_queso.isSelected()) { c_queso = "1"; cost += 3.64;} 
-          if (jrb_c_guac.isSelected()) { c_guac = "1"; cost += 3.69;} 
-          jrb_c_salsa.setSelected(false);
-          jrb_c_queso.setSelected(false);
-          jrb_c_guac.setSelected(false);
+        if (buttons.length > 13) {
+            ret = "INSERT INTO order_entries (order_number, customer, base, protein, guacamole, queso, chips_salsa, chips_queso, chips_guac, brownie, cookie, drink_16oz, drink_22oz, cost, date) VALUES ( " + ordernumber_stmt + "," + customer_id + ",\'" + base_ + "\',\'" + protein_  + "\', \'" + order_items[4] + "\', \'" + order_items[6] + "\', \'" + order_items[6] + "\', \'" + order_items[7] + "\', \'" + order_items[8] + "\', \'" + order_items[9] + "\', \'" + order_items[10] + "\', \'" + order_items[11] + "\', \'" + order_items[12] + "\', " + df.format(curr_total) + ", \'" + date + "\', \'" + order_items[13] + "\')";
+        } else {
+            ret = "INSERT INTO order_entries (order_number, customer, base, protein, guacamole, queso, chips_salsa, chips_queso, chips_guac, brownie, cookie, drink_16oz, drink_22oz, cost, date) VALUES ( " + ordernumber_stmt + "," + customer_id + ",\'" + base_ + "\',\'" + protein_  + "\', \'" + order_items[4] + "\', \'" + order_items[6] + "\', \'" + order_items[6] + "\', \'" + order_items[7] + "\', \'" + order_items[8] + "\', \'" + order_items[9] + "\', \'" + order_items[10] + "\', \'" + order_items[11] + "\', \'" + order_items[12] + "\', " + df.format(curr_total) + ", \'" + date + "\')";
+        }
 
-          //dessert
-          String brownie = "0";
-          String cookie = "0";
-          if (jrb_brownie.isSelected()) {brownie = "1"; cost += 1.99;}
-          if (jrb_cookie.isSelected()) {cookie = "1"; cost += 1.99;}
-          jrb_brownie.setSelected(false);
-          jrb_cookie.setSelected(false);
+        base.clearSelection();
+        protein.clearSelection();
+        JOptionPane.showMessageDialog(null,"Total: " + df.format(curr_total));
+        curr_total = 0;
+        total.setText("Total: " + df.format(curr_total));
 
-          //drink
-          String small_drink = "0";
-          String large_drink = "0";  
-          if (jrb_small_drink.isSelected()) { small_drink = "1"; cost += 2.25;} 
-          if (jrb_large_drink.isSelected()) { large_drink = "1"; cost += 2.45;} 
-          jrb_small_drink.setSelected(false);
-          jrb_large_drink.setSelected(false);
+        for (int i = 0; i < buttons.length; i++) {
+            if (buttons[i] == null) { break; }
+            buttons[i].setSelected(false);
+            
+        }
+        return ret;
+    }
 
-          if (! (same_customer.isSelected()) ) {customer += 1;} //if its not the same customer, increase cust num
-          same_customer.setSelected(false);
+    void addSeasonalItem(String seasonal_name, String seasonal_price, String max_count) {
+        Connection conn = null;
+        String teamNumber = "22";
+        String sectionNumber = "913";
+        String dbName = "csce315_" + sectionNumber + "_" + teamNumber ;
+        String dbConnectionString = "jdbc:postgresql://csce-315-db.engr.tamu.edu/" + dbName;
+        new dbSetup(); 
+    
+        //Connecting to the database
+        try {
+            conn = DriverManager.getConnection(dbConnectionString, dbSetup.user, dbSetup.pswd);
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.err.println(e.getClass().getName()+": "+e.getMessage());
+            System.exit(0);
+        }
 
-          //creating string to query
-          int ordernumber_stmt = Integer.parseInt( order_date_num + ordernumber);
-          String sql_stmt = "INSERT INTO order_entries (order_number, customer, base, protein, guacamole, queso, chips_salsa, chips_queso, chips_guac, brownie, cookie, drink_16oz, drink_22oz, cost, date) VALUES (" + ordernumber_stmt + ", " + customer + ", \'" + base + "\', \'" + protein + "\', \'" + guac + "\', \'" + queso + "\', \'" + c_salsa + "\', \'" + c_queso + "\', \'" + c_guac + "\', \'" + brownie + "\', \'" + cookie + "\', \'" + small_drink + "\', \'" + large_drink + "\', " + cost + ", \'" + date + "\')";
+          System.out.println("Opened database successfully");    
 
-          ordernumber += 1; //unique order number every time
 
-          /* PSQL STUFF */
-          
-          //copied from lab 
-          Connection conn = null;
-          String teamNumber = "22";
-          String sectionNumber = "913";
-          String dbName = "csce315_" + sectionNumber + "_" + teamNumber ;
-          String dbConnectionString = "jdbc:postgresql://csce-315-db.engr.tamu.edu/" + dbName;
-          dbSetup myCredentials = new dbSetup(); 
+        try {
+            Statement stmt = conn.createStatement();
+
+            String sqlStatement = "INSERT INTO inventory (food_id, food_name, current_count, max_count, sell_price, is_menu_item) VALUES (" + next_food_id + ",\'" + seasonal_name + "\',0," + max_count + "," + seasonal_price + ",'t')";
+
+            //JOptionPane.showMessageDialog(null,sqlStatement);
+            stmt.executeUpdate(sqlStatement);
+
+            sqlStatement = "ALTER TABLE order_entries ADD " + seasonal_name + " BIT";
+            stmt.executeUpdate(sqlStatement);
+
+            
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.err.println(e.getClass().getName()+": "+e.getMessage());
+            System.exit(0);
+        }
       
-          //Connecting to the database
-          try {
-              conn = DriverManager.getConnection(dbConnectionString, dbSetup.user, dbSetup.pswd);
-            } catch (Exception e_) {
-              e_.printStackTrace();
-              System.err.println(e_.getClass().getName()+": "+e_.getMessage());
-              System.exit(0);
+        //closing the connection
+        try {
+          conn.close();
+          System.out.println("Connection Closed.");
+        } catch(Exception e) {
+          System.out.println("Connection NOT Closed.");
+        }//end try catch
+
+        updateView();
+        //SwingUtilities.updateComponentTreeUI(this);
+    }
+        
+    String[][] getData() { //string[] that contains [food_name] [sell_price]
+        String[][] data = new String[0][0];
+        Connection conn = null;
+        String teamNumber = "22";
+        String sectionNumber = "913";
+        String dbName = "csce315_" + sectionNumber + "_" + teamNumber ;
+        String dbConnectionString = "jdbc:postgresql://csce-315-db.engr.tamu.edu/" + dbName;
+        new dbSetup(); 
+    
+        //Connecting to the database
+        try {
+            conn = DriverManager.getConnection(dbConnectionString, dbSetup.user, dbSetup.pswd);
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.err.println(e.getClass().getName()+": "+e.getMessage());
+            System.exit(0);
+        }
+
+          System.out.println("Opened database successfully");    
+
+
+        try {
+            Statement stmt = conn.createStatement();
+
+            String sqlStatement = "SELECT count(food_id) AS count FROM inventory";
+
+            //send statement to DBMS
+            ResultSet result = stmt.executeQuery(sqlStatement);
+            result.next();
+            int length = Integer.parseInt(result.getString("count"));
+            next_food_id = length; //used for seasonal item
+            sqlStatement = "SELECT * FROM inventory ORDER BY food_id ASC";
+            
+            result = stmt.executeQuery(sqlStatement);
+
+            
+            String[][]temp = new String [length][3];
+            int entry_nr = 0;
+            while (result.next()) {
+
+                boolean is_menu_item = result.getBoolean("is_menu_item");
+
+                if (is_menu_item) {
+                    temp[entry_nr][0] = result.getString("food_name")+"\n";
+                    temp[entry_nr][1] = result.getString("sell_price")+"\n";
+
+
+                    String is_prot = Boolean.toString(result.getBoolean("is_protein"));
+                    temp[entry_nr][2] = is_prot+"\n";
+                    entry_nr++;
+                }
+
+            }
+            data = new String[entry_nr][3];
+
+            for (int i = 0; i < entry_nr; i++) {
+                data[i][0] = temp[i][0];
+                data[i][1]= temp[i][1];
+                data[i][2] = temp[i][2];
             }
 
-            System.out.println("Opened database successfully");
 
-            try {
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.err.println(e.getClass().getName()+": "+e.getMessage());
+            System.exit(0);
+        }
+      
+        //closing the connection
+        try {
+          conn.close();
+          System.out.println("Connection Closed.");
+        } catch(Exception e) {
+          System.out.println("Connection NOT Closed.");
+        }//end try catch
+        
+        return data;
+
+      } //end of getdata
+
+    void sendData(String sqlStatement) {
+        Boolean isempty = true;
+        for (int i = 0; i < order_items.length; i++) {
+            if (order_items[i] != 0) { isempty = false; } 
+        }
+
+        if (isempty) { return; }
+        Connection conn = null;
+        String teamNumber = "22";
+        String sectionNumber = "913";
+        String dbName = "csce315_" + sectionNumber + "_" + teamNumber ;
+        String dbConnectionString = "jdbc:postgresql://csce-315-db.engr.tamu.edu/" + dbName;
+        new dbSetup(); 
+
+        //Connecting to the database
+        try {
+            conn = DriverManager.getConnection(dbConnectionString, dbSetup.user, dbSetup.pswd);
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.err.println(e.getClass().getName()+": "+e.getMessage());
+            System.exit(0);
+        }
+
+        System.out.println("Opened database successfully");
+
+        
+        try {
             //create a statement object
             Statement stmt = conn.createStatement();
 
-              stmt.executeUpdate(sql_stmt); //executeUpdate to get arround execption
-            } catch (Exception e_){
+            stmt.executeUpdate(sqlStatement); //executeUpdate to get arround execption
+        } catch (Exception e_){
             e_.printStackTrace();
             System.err.println(e_.getClass().getName()+": "+e_.getMessage());
+        }
+    
+        //closing the connection
+        try {
+        conn.close();
+        System.out.println("Connection Closed.");
+        } catch(Exception e) {
+        System.out.println("Connection NOT Closed.");
+        }//end try catch
+
+        order_items = new Integer[buttons.length];
+    }
+
+    void updateView() {
+        //basically rerunning main function
+        Demo f = new Demo(); 
+        f.setBounds(100, 100, 768, 768); 
+        f.setTitle("CABO GRILL ORDER ENTRY (+ SEASONAL ITEMS)"); 
+        f.setVisible(true); 
+        menu_items = new String[0][0];
+        buttons = new JRadioButton[0];
+        menu_items = getData();
+        this.setLayout(null);
+        base_setup();
+        arr_to_buttons(menu_items);
+        misc_buttons();
+    }
+
+    public Demo() {
+        menu_items = getData();
+        this.setLayout(null);
+        base_setup();
+        arr_to_buttons(menu_items);
+        misc_buttons();
+    }//end of public demo
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        curr_total = 0.0;
+        boolean zero = true;
+
+        order_items = new Integer[buttons.length];
+        for (int i = 0; i < buttons.length; i++ ) {
+
+            if (buttons[i] == null) { break; }
+            if (buttons[i].isSelected()) {
+                zero = false;
+                curr_total += Double.parseDouble(menu_items[i][1]);
+                order_items[i] = 1;
+            } else {
+                order_items[i] = 0;
             }
-      
-        
-          //closing the connection
-          try {
-            conn.close();
-            System.out.println("Connection Closed.");
-          } catch(Exception e_) {
-            System.out.println("Connection NOT Closed.");
-          }//end try catch
-          
-        } 
-    }); 
-  }
+        }
+
+        if (zero) {
+            curr_total = 0.0;
+        }
+
+
+        total.setText("Total: " + df.format(curr_total));
+
+
+    }
 }
 
-
 public class order_entry_test {
-  public static void main(String args[]) {
-    Demo f = new Demo(); 
-  
-    // Setting Bounds of JFrame. 
-    f.setBounds(100, 100, 768, 768); 
+    public static void main(String args[]) {
 
-    // Setting Title of frame. 
-    f.setTitle("CABO GRILL ORDER ENTRY"); 
+        Demo f = new Demo(); 
+        f.setBounds(100, 100, 768, 768); 
+        f.setTitle("CABO GRILL ORDER ENTRY"); 
+        f.setVisible(true); 
 
-    // Setting Visible status of frame as true. 
-    f.setVisible(true); 
-
-  }//end main
+    }//end main
 }//end Class
