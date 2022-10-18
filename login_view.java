@@ -23,7 +23,7 @@ public class login_view implements ActionListener {
         t1.start();
     }
 
-    private class RunnableImpl implements Runnable {
+    public class RunnableImpl implements Runnable {
  
         public void run()
         {
