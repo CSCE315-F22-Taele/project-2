@@ -17,54 +17,50 @@ public class login_view implements ActionListener {
     private static JPasswordField passText;
     private static JButton button;
     private static JLabel success;
-    public static void main(String[] args){
+    
 
-        Thread t1 = new Thread(new login_view().new RunnableImpl());
-        t1.start();
-    }
+        //GUI
+        JPanel panel = new JPanel();
+        JFrame frame = new JFrame();
+    login_view(){
+        frame.setSize(400, 200);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setVisible(true);
+        frame.add(panel);
 
-    private class RunnableImpl implements Runnable {
- 
-        public void run()
-        {
-            //GUI
-            JPanel panel = new JPanel();
-            JFrame frame = new JFrame();
-            frame.setSize(350, 200);
-            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            frame.setVisible(true);
-            frame.add(panel);
+        panel.setLayout(null);
+        username = new JLabel("Username");
+        username.setBounds(10, 20, 80, 25);
+        panel.add(username);
 
-            panel.setLayout(null);
-            username = new JLabel("Username");
-            username.setBounds(10, 20, 80, 25);
-            panel.add(username);
-
-            userText = new JTextField(20);
-            userText.setBounds(100, 25, 165, 20);
-            panel.add(userText);
+        userText = new JTextField(20);
+        userText.setBounds(100, 25, 165, 20);
+        panel.add(userText);
 
 
-            password = new JLabel("Password");
-            password.setBounds(10, 50, 80, 25);
-            panel.add(password);
-            passText = new JPasswordField();
-            passText.setBounds(100, 50, 165, 20);
-            panel.add(passText);
-            
+        password = new JLabel("Password");
+        password.setBounds(10, 50, 80, 25);
+        panel.add(password);
+        passText = new JPasswordField();
+        passText.setBounds(100, 50, 165, 20);
+        panel.add(passText);
+        
 
-            //button
-            button = new JButton("Login");
-            button.setBounds(10, 80, 80, 25);
-            button.addActionListener(new login_view());
-            panel.add(button);
+        //button
+        button = new JButton("Login");
+        button.setBounds(10, 80, 80, 25);
+        button.addActionListener(this);
+        panel.add(button);
 
-            success = new JLabel("");
-            success.setBounds(10, 110, 300, 25);
-            panel.add(success);
+        success = new JLabel("");
+        success.setBounds(10, 110, 300, 25);
+        panel.add(success);
 
-            frame.setVisible(true);
-        }
+        //frame.pack();
+        panel.revalidate();
+        panel.repaint();
+        frame.setVisible(true);
+        
     }
 
     public void actionPerformed(ActionEvent event){
@@ -87,6 +83,14 @@ public class login_view implements ActionListener {
     
 
         String user = userText.getText();
+        boolean id_flag = false; // false/odd is manager and true/even is server
+        String temp_user = user; 
+        try {  
+            if(Integer.parseInt(temp_user) % 2 == 0){
+                id_flag = true;
+            }
+          } catch(NumberFormatException e){  
+          }  
         if(!isNumeric(user)){
             success.setText("Username entered is incorrect");
             return;
@@ -95,9 +99,13 @@ public class login_view implements ActionListener {
         try{
             // while(true){
                 Statement stmt = conn.createStatement();
-                String sqlStatement = "SELECT password FROM server WHERE server_id = " + user;
+                String sqlStatement = "SELECT password FROM manager WHERE manager_id = " + user;
+                if(id_flag){
+                    sqlStatement = "SELECT password FROM server WHERE server_id = " + user;
+                }
                 ResultSet result = stmt.executeQuery(sqlStatement);
                 if(!result.next()){
+                    success.setText("Username entered is incorrect");
                     return;
                 }
                 String pass = result.getString("password");
@@ -128,5 +136,8 @@ public class login_view implements ActionListener {
         } catch(NumberFormatException e){  
           return false;  
         }  
+      }
+      public static void main(String[] args){
+        new login_view();
       }
 }
