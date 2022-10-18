@@ -123,6 +123,10 @@ public class login_view implements ActionListener {
                         new Demo();
                         frame.dispose();
                     }
+                    else{
+                        new manager_view();
+                        frame.dispose();
+                    }
                 }
             //}
         }
