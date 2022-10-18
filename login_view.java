@@ -119,6 +119,10 @@ public class login_view implements ActionListener {
                 }
                 else{
                     success.setText("Successfully logged in");
+                    if(id_flag == true){
+                        new Demo();
+                        frame.dispose();
+                    }
                 }
             //}
         }
