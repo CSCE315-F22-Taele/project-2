@@ -21,7 +21,7 @@ class Demo extends JFrame implements ActionListener {
     int order_id = 0;
     int customer_id = -1;
     double curr_total = 0.0; //current price of order
-    JTable j;
+    
     JTextField total = new JTextField();
     JRadioButton same_customer = new JRadioButton("Same Customer?");
     JButton back_to_login = new JButton("Sign Out");
@@ -57,7 +57,6 @@ class Demo extends JFrame implements ActionListener {
         buttons = new JRadioButton[str_arr.length];
         for (int i = 0; i < str_arr.length; i++) {
             if (str_arr[i][0] == null) { break; }
-            System.out.println("adding " + str_arr[i][0]);
             JRadioButton temp = new JRadioButton(str_arr[i][0]);
             JLabel temp_ = new JLabel(str_arr[i][1]);
             temp.addActionListener(this);
@@ -446,9 +445,6 @@ class Demo extends JFrame implements ActionListener {
         base_setup();
         arr_to_buttons(menu_items);
         misc_buttons();
-        JScrollPane pane = new JScrollPane(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-        this.setContentPane(pane);
-
     }
 
     public Demo() {
@@ -460,6 +456,11 @@ class Demo extends JFrame implements ActionListener {
         this.setBounds(100, 100, 768, 768); 
         this.setTitle("CABO GRILL ORDER ENTRY"); 
         this.setVisible(true); 
+        JPanel panel=new JPanel();
+        JScrollPane scrollBar=new JScrollPane(panel,JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
+        this.add(scrollBar);
+        this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
     }
 
     @Override
