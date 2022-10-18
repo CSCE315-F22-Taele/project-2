@@ -250,51 +250,6 @@ public class inventory_view implements ActionListener{
 
     public void updateTable() {
         String[][] data = getData();
-<<<<<<< HEAD
-            String columns[] = {"food_id", "food_name", "current_count", "max_count", "sell_price"};
-            DefaultTableModel tableModel = new DefaultTableModel(data,columns);
-            table.setModel(tableModel);
-            tableModel.fireTableDataChanged();
-        // f.dispose();
-        // f = new JFrame("inventory GUI");
-        // f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        // f.getContentPane().setLayout(new BoxLayout(f.getContentPane(), BoxLayout.Y_AXIS));
-
-        // data = getData();
-
-        // table = new JTable(data,columns);
-        // table.setBounds(30,40,200,300);          
-        // JScrollPane sp=new JScrollPane(table);    
-        // f.getContentPane().add(sp);
-
-        // JPanel p = new JPanel(new BorderLayout());
-
-        // input_data = new String[1][6];
-        // JTable input = new JTable(input_data,columns);
-        // input.setBounds(30,40,200,300);
-        // p.add(input, BorderLayout.PAGE_START);
-
-        // JPanel pButtons = new JPanel(new FlowLayout());
-        // JButton addItem = new JButton("Add Item");
-        // JButton updateItem = new JButton("Update Item");
-        // JButton deleteItem = new JButton("Delete Item");
-
-        // inventory_view iv = new inventory_view();
-        // addItem.addActionListener(iv);
-        // updateItem.addActionListener(iv);
-        // deleteItem.addActionListener(iv);
-
-        // pButtons.add(addItem);
-        // pButtons.add(updateItem);
-        // pButtons.add(deleteItem);
-
-        // p.add(pButtons, BorderLayout.CENTER);
-        
-        // f.getContentPane().add(p);
-        // f.setSize(300,400);
-        // f.pack();
-        // f.setVisible(true);       
-=======
         DefaultTableModel tableModel = new DefaultTableModel(data,columns);
         table.setModel(tableModel);
         tableModel.fireTableDataChanged();     
@@ -370,6 +325,5 @@ public class inventory_view implements ActionListener{
         }
 
         return false;
->>>>>>> 753d07189cf78b64a293b5097ac73cdee9acb948
     }
 }
