@@ -17,11 +17,12 @@ public class login_view implements ActionListener {
     private static JPasswordField passText;
     private static JButton button;
     private static JLabel success;
-    public static void main(String[] args){
+    
 
         //GUI
         JPanel panel = new JPanel();
         JFrame frame = new JFrame();
+    login_view(){
         frame.setSize(400, 200);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setVisible(true);
@@ -48,7 +49,7 @@ public class login_view implements ActionListener {
         //button
         button = new JButton("Login");
         button.setBounds(10, 80, 80, 25);
-        button.addActionListener(new login_view());
+        button.addActionListener(this);
         panel.add(button);
 
         success = new JLabel("");
@@ -134,5 +135,8 @@ public class login_view implements ActionListener {
         } catch(NumberFormatException e){  
           return false;  
         }  
+      }
+      public static void main(String[] args){
+        new login_view();
       }
 }
