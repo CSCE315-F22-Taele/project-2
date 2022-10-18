@@ -203,8 +203,6 @@ public class inventory_view implements ActionListener{
                 } else {
                     JOptionPane.showMessageDialog(null,"Wrong type used in field.");
                 }
-            
-
             } catch (Exception exception) {
                 exception.printStackTrace();
                 System.err.println(exception.getClass().getName()+": "+exception.getMessage());
