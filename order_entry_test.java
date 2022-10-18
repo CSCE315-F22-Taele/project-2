@@ -8,7 +8,6 @@ import java.util.Enumeration;
 import javax.swing.ButtonGroup;
 
 
-
 /*
  *  @joshbatac
  *  javac *java && java -cp ".:postgresql-42.2.8.jar" order_entry_test
@@ -22,10 +21,10 @@ class Demo extends JFrame implements ActionListener {
     int order_id = 0;
     int customer_id = -1;
     double curr_total = 0.0; //current price of order
-
+    
     JTextField total = new JTextField();
     JRadioButton same_customer = new JRadioButton("Same Customer?");
-    JButton back_to_login = new JButton("Back to login");
+    JButton back_to_login = new JButton("Sign Out");
     ButtonGroup base = new ButtonGroup();
     ButtonGroup protein = new ButtonGroup();
 
@@ -33,11 +32,8 @@ class Demo extends JFrame implements ActionListener {
     String[][] menu_items = new String[0][0];
     JRadioButton[] buttons = new JRadioButton[0];
 
-    
     DecimalFormat df = new DecimalFormat("0.00");
-
     
-
     void base_setup() {
         JRadioButton burrito = new JRadioButton();
         burrito.setText("Burrito");
@@ -60,7 +56,6 @@ class Demo extends JFrame implements ActionListener {
         buttons = new JRadioButton[str_arr.length];
         for (int i = 0; i < str_arr.length; i++) {
             if (str_arr[i][0] == null) { break; }
-            System.out.println("adding " + str_arr[i][0]);
             JRadioButton temp = new JRadioButton(str_arr[i][0]);
             JLabel temp_ = new JLabel(str_arr[i][1]);
             temp.addActionListener(this);
@@ -94,14 +89,6 @@ class Demo extends JFrame implements ActionListener {
 
         back_to_login.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                
-                /* 
-                Demo f_ = new Demo(); 
-                f_.setBounds(100, 100, 768, 768); 
-                f_.setTitle("CABO GRILL ORDER ENTRY"); 
-                f_.setVisible(true); 
-                setVisible(false);
-                */
 
                 new login_view();
                 dispose();
@@ -164,7 +151,10 @@ class Demo extends JFrame implements ActionListener {
         addSeasonal.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 String seasonal_name = JOptionPane.showInputDialog("Name of Seasonal Item: ");
-
+                if (seasonal_name.isBlank()) {
+                    JOptionPane.showMessageDialog(null, "Not a Valid Name");
+                    return;
+                }
                 for (int i = 0; i < menu_items.length; i++) {
                     if (menu_items[i][0] == null) {break;}
                     String temp = menu_items[i][0];
@@ -244,7 +234,7 @@ class Demo extends JFrame implements ActionListener {
 
         base_ = base_.replace("\n","");
         protein_ = protein_.replace("\n", "");
-
+    
         if (buttons.length > 13) {
             ret = "INSERT INTO order_entries (order_number, customer, base, protein, guacamole, queso, chips_salsa, chips_queso, chips_guac, brownie, cookie, drink_16oz, drink_22oz, cost, date) VALUES ( " + ordernumber_stmt + "," + customer_id + ",\'" + base_ + "\',\'" + protein_  + "\', \'" + order_items[4] + "\', \'" + order_items[6] + "\', \'" + order_items[6] + "\', \'" + order_items[7] + "\', \'" + order_items[8] + "\', \'" + order_items[9] + "\', \'" + order_items[10] + "\', \'" + order_items[11] + "\', \'" + order_items[12] + "\', " + df.format(curr_total) + ", \'" + date + "\', \'" + order_items[13] + "\')";
         } else {
@@ -404,6 +394,8 @@ class Demo extends JFrame implements ActionListener {
         }
 
         if (isempty) { return; }
+
+        
         Connection conn = null;
         String teamNumber = "22";
         String sectionNumber = "913";
@@ -428,6 +420,18 @@ class Demo extends JFrame implements ActionListener {
             Statement stmt = conn.createStatement();
 
             stmt.executeUpdate(sqlStatement); //executeUpdate to get arround execption
+
+            for (int i = 0; i < order_items.length; i++) {
+                if (order_items[i] == 1) {
+                    String column_name = menu_items[i][0];
+                    column_name = column_name.replace("\n", "");
+                    
+                    String SQLstmt_ = "UPDATE inventory SET current_count = current_count - 1 WHERE food_name = \'"+ column_name + "\'";
+                    System.out.println(SQLstmt_);
+                    stmt.executeUpdate(SQLstmt_);
+
+                }
+            }
         } catch (Exception e_){
             e_.printStackTrace();
             System.err.println(e_.getClass().getName()+": "+e_.getMessage());
@@ -468,6 +472,11 @@ class Demo extends JFrame implements ActionListener {
         this.setBounds(100, 100, 768, 768); 
         this.setTitle("CABO GRILL ORDER ENTRY"); 
         this.setVisible(true); 
+        JPanel panel=new JPanel();
+        JScrollPane scrollBar=new JScrollPane(panel,JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
+        this.add(scrollBar);
+        this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
     }
 
     @Override
