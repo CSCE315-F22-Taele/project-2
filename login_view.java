@@ -9,7 +9,9 @@ import java.sql.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-// @author Semion Dyadkin
+/**
+ * login_view shows login page for the point of sale system  
+ * @author Semion Dyadkin */
 public class login_view implements ActionListener {
     private static JLabel username;
     private static JTextField userText;
@@ -22,7 +24,14 @@ public class login_view implements ActionListener {
     // GUI
     JPanel panel = new JPanel();
     JFrame frame = new JFrame();
-    // login_view constructor 
+    /** login_view() function is the constructor for class login_view
+     *
+     * @param N/A
+     * @return N/A
+     * @throws N/A
+     * @see Frame general GUI stuff for login
+     *
+     */
     login_view(){
         // frame
         frame.setSize(400, 200);
@@ -66,7 +75,14 @@ public class login_view implements ActionListener {
         frame.setVisible(true);
         
     }
-
+    /** actionPerformed(ActionEvent event) function provides functionallity to the button pressed which is login
+     *  
+     * @param actionEvent event -- 'this' is use case
+     * @return void function
+     * @throws catch exception if database connection fails
+     * @see new panel when entered correctly or incorrect username/password
+     *
+     */
     // When login is clicked, this function will check the username field first
     // if its in database. If its not, it will tell you that username is wrong, if you entered
     // an incorrect password to an exisiting username, you will get username is wrong.
@@ -144,7 +160,14 @@ public class login_view implements ActionListener {
         }
     }
 
-    // function to check if a string is an int
+    /** isNumeric() function checks if a string is a numerical value (int) 
+     *
+     * @param String str -- the String to be checked
+     * @return boolean  
+     * @throws catch N/A
+     * @see N/A
+     *
+     */
     public static boolean isNumeric(String str) { 
         try {  
           Integer.parseInt(str);
@@ -153,6 +176,14 @@ public class login_view implements ActionListener {
           return false;  
         }  
       }
+          /** main() function instantiates the login_view
+     *
+     * @param N/A
+     * @return N/A
+     * @throws N/A
+     * @see login_view GUI
+     *
+     */
       public static void main(String[] args){
         new login_view();
       }
