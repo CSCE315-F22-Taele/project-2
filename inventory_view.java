@@ -5,7 +5,8 @@ import java.awt.event.*;
 //import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.table.*;
-/* Inventory_view displays the inventory using java swing elements and jdbc queries to the database.
+
+/** Inventory_view displays the inventory using java swing elements and jdbc queries to the database.
  * @author Asger Schelde Larsen
  * 
  */
@@ -17,37 +18,43 @@ public class inventory_view implements ActionListener{
     private static JFrame f = new JFrame("inventory GUI");
     private static JTable table;
     private static JTable input;
+    private static JPanel p;
 
     public static void main(String[] args) {
         new inventory_view();
     }
 
+    /** inventory_view() is the class constructor which initializes all java swing elements and sets the frame visible.
+    * @author Asger Schelde Larsen
+    * @param none
+    * @return {String} sqlStatement
+    */
     public inventory_view() {
         // create a new frame
         f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
         f.getContentPane().setLayout(new BoxLayout(f.getContentPane(), BoxLayout.Y_AXIS));
 
-
+        // setup table with data from database
         data = getData();
-
         table = new JTable(data,columns);
         table.setBounds(30,40,200,300);          
         JScrollPane sp=new JScrollPane(table);    
         f.getContentPane().add(sp);
 
-        JPanel p = new JPanel(new BorderLayout());
+        // Setup the main JPanel for the inventory screen
+        p = new JPanel(new BorderLayout());
 
+        // Setup table for input data and add to JPanel
         input_data = new String[1][6];
         input = new JTable(input_data,columns);
         input.setBounds(30,40,200,300);
         p.add(input, BorderLayout.PAGE_START);
 
+        // Create buttons and actionlisteners
         JPanel pButtons = new JPanel(new FlowLayout());
         JButton addItem = new JButton("Add Item");
         JButton updateItem = new JButton("Update Item");
         JButton deleteItem = new JButton("Delete Item");
-
         JButton back = new JButton("Back");
         JButton stockReport = new JButton("Show Stock Report");
 
@@ -57,6 +64,7 @@ public class inventory_view implements ActionListener{
         back.addActionListener(this);
         stockReport.addActionListener(this);
 
+        // Add buttons to
         pButtons.add(addItem);
         pButtons.add(updateItem);
         pButtons.add(deleteItem);
@@ -73,12 +81,11 @@ public class inventory_view implements ActionListener{
         
     }
 
-/* getData() sends a jdbc query to the database to get the inventory data and return it
- * @author Asger Schelde Larsen
- * @param none
- * @return {ArrayList<String[]>} data
- */
-
+    /** getData() sends a jdbc query to the database to get the inventory data and return it
+     * @author Asger Schelde Larsen
+     * @param none
+     * @return {String[][]} data
+     */
     static String[][] getData() {
         String[][] data = new String[0][0];
         Connection conn = null;
@@ -97,8 +104,6 @@ public class inventory_view implements ActionListener{
             System.err.println(e.getClass().getName()+": "+e.getMessage());
             System.exit(0);
           }
-
-        //System.out.println("Opened database successfully");
 
         try{
             //create a statement object
@@ -133,6 +138,11 @@ public class inventory_view implements ActionListener{
         return data;
     }
 
+    /** actionPerformed handles actions to beformed when a button is clicked
+    * @author Asger Schelde Larsen
+    * @param none
+    * @return none
+    */
     // if button is pressed
     public void actionPerformed(ActionEvent e)
     {
@@ -156,7 +166,11 @@ public class inventory_view implements ActionListener{
         String s = e.getActionCommand();
         if (s.equals("Back")) {
             new manager_view();
+            f.getContentPane().removeAll();
+            f.repaint();
             f.dispose();
+            System.out.println(f == null);
+            p = null;
         } else if (s.equals("Add Item")) {
             try {
                 Statement stmt = conn.createStatement();
@@ -236,18 +250,17 @@ public class inventory_view implements ActionListener{
             }
         } else if (s.equals("Show Stock Report")) {
             // frame
-            JFrame f;
+            JFrame frame;
             // Table
             JTable j;
 
-            f = new JFrame();
+            frame = new JFrame();
 
             // Frame Title
-            f.setTitle("Restock Report");
+            frame.setTitle("Restock Report");
 
             // pull all the menu items from the inventory to be displayed
             String[][] inv = getRestockReport();
-
 
             // Initializing the JTable
             j = new JTable(inv, columns);
@@ -255,13 +268,18 @@ public class inventory_view implements ActionListener{
 
             // adding it to JScrollPane
             JScrollPane sp = new JScrollPane(j);
-            f.add(sp);
+            frame.add(sp);
             // Frame Size
-            f.setSize(760, 375);
-            f.setVisible(true);
+            frame.setSize(760, 375);
+            frame.setVisible(true);
         }
     }
 
+    /** getRestockReport returns a 2D-array with all inventory items with a current_count lower or equal to 20% of max_count
+    * @author Asger Schelde Larsen
+    * @param none
+    * @return {String[][]} data
+    */
     private String[][] getRestockReport() {
         String[][] data = new String[0][0];
         Connection conn = null;
@@ -280,8 +298,6 @@ public class inventory_view implements ActionListener{
             System.err.println(e.getClass().getName()+": "+e.getMessage());
             System.exit(0);
           }
-
-        //System.out.println("Opened database successfully");
 
         try{
             //create a statement object
@@ -316,6 +332,11 @@ public class inventory_view implements ActionListener{
         return data;
     }
 
+    /** updateTable() updates the Model for the table with newest data
+    * @author Asger Schelde Larsen
+    * @param none
+    * @return none
+    */
     public void updateTable() {
         String[][] data = getData();
         DefaultTableModel tableModel = new DefaultTableModel(data,columns);
@@ -326,6 +347,11 @@ public class inventory_view implements ActionListener{
         }
     }
 
+    /** makeQuery() generates the query statement from the input data given by the user.
+    * @author Asger Schelde Larsen
+    * @param none
+    * @return {String} sqlStatement
+    */
     public String makeQuery() {
         //Make query using input data
         boolean needForComma = false;
@@ -372,6 +398,11 @@ public class inventory_view implements ActionListener{
         }
     }
 
+    /** makeInsert() genreates an insert statement from the input data given by the user
+    * @author Asger Schelde Larsen
+    * @param none
+    * @return {String} sqlStatement
+    */
     public String makeInsert() {
         //Make query using input data
         boolean needForComma = false;
@@ -455,6 +486,11 @@ public class inventory_view implements ActionListener{
         }
     }
 
+    /** checkIdExists() executes a query to check if the given ID exists in the inventory table.
+    * @author Asger Schelde Larsen
+    * @param none
+    * @return {int}
+    */
     public int checkIdExists(Statement stmt) {
         String checkIdExistsStmt = "SELECT count(*) FROM inventory WHERE food_id = " + input_data[0][0];
             try {
@@ -469,6 +505,11 @@ public class inventory_view implements ActionListener{
             return -1;
     }
 
+    /** checkInputTypeOk() checks that all user inputs can be parsed from String to the desired type.
+    * @author Asger Schelde Larsen
+    * @param none
+    * @return {String} sqlStatement
+    */
     public boolean checkInputTypeOk() {
         //Check ID is not null or empty
         if (input_data[0][0] == null || input_data[0][0].isEmpty()) {
