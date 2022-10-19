@@ -14,7 +14,7 @@ public class inventory_view implements ActionListener{
 
     private static String[][] input_data;
     private static String[][] data;
-    private static String columns[] = {"ID", "Name", "Current Count", "Maximum Count", "Sell Price", "Is Menu Item"};
+    private static String columns[] = {"ID", "Name", "Current Count", "Maximum Count", "Sell Price", "Is Menu Item", "Is Protein"};
     private static JFrame f = new JFrame("inventory GUI");
     private static JTable table;
     private static JTable input;
@@ -59,7 +59,7 @@ public class inventory_view implements ActionListener{
         input_panel.add(input_title,BorderLayout.PAGE_START);
 
         // Setup table for input data and add to JPanel
-        input_data = new String[1][6];
+        input_data = new String[1][7];
         input = new JTable(input_data,columns);
         input.setBounds(30,40,200,300);
         input_panel.add(input, BorderLayout.CENTER);
@@ -130,7 +130,7 @@ public class inventory_view implements ActionListener{
             ResultSet result = stmt.executeQuery(sqlStatement);
             result.next();
             int length = Integer.parseInt(result.getString("count"));
-            data = new String[length][6];
+            data = new String[length][7];
 
             sqlStatement = "SELECT * FROM inventory ORDER BY food_id ASC";
             //send statement to DBMS
@@ -144,6 +144,7 @@ public class inventory_view implements ActionListener{
                 data[entry_nr][3] = result.getString("max_count")+"\n";
                 data[entry_nr][4] = result.getString("sell_price")+"\n";
                 data[entry_nr][5] = result.getString("is_menu_item")+"\n";
+                data[entry_nr][6] = result.getString("is_protein")+"\n";
                 entry_nr++;
             }
             conn.close();
@@ -332,7 +333,7 @@ public class inventory_view implements ActionListener{
             ResultSet result = stmt.executeQuery(sqlStatement);
             result.next();
             int length = Integer.parseInt(result.getString("count"));
-            data = new String[length][6];
+            data = new String[length][7];
 
             sqlStatement = "SELECT * FROM inventory WHERE current_count < (max_count/5) ORDER BY food_id ASC";
             //send statement to DBMS
@@ -346,6 +347,7 @@ public class inventory_view implements ActionListener{
                 data[entry_nr][3] = result.getString("max_count")+"\n";
                 data[entry_nr][4] = result.getString("sell_price")+"\n";
                 data[entry_nr][5] = result.getString("is_menu_item")+"\n";
+                data[entry_nr][6] = result.getString("is_protein")+"\n";
                 entry_nr++;
             }
             conn.close();
@@ -415,6 +417,14 @@ public class inventory_view implements ActionListener{
                 sqlStatement += ", ";
             }
             sqlStatement += "is_menu_item = '" + input_data[0][5] + "'";
+            needForComma = true;
+        }
+        // Checking if is_protein has an input.
+        if (input_data[0][6] != null && !input_data[0][6].isEmpty()) {
+            if (needForComma) {
+                sqlStatement += ", ";
+            }
+            sqlStatement += "is_protein = '" + input_data[0][6] + "'";
             needForComma = true;
         }
         sqlStatement += " WHERE food_id = " + input_data[0][0];
@@ -512,6 +522,20 @@ public class inventory_view implements ActionListener{
             sqlStatement += "'f'";
             needForComma = true;
         }
+        //Check if Is_protein has an input. Otherwise set to 'f'
+        if (input_data[0][6] != null && !input_data[0][6].isEmpty()) {
+            if (needForComma) {
+                sqlStatement += ", ";
+            }
+            sqlStatement += "'" + input_data[0][6] + "'";
+            needForComma = true;
+        } else {
+            if (needForComma) {
+                sqlStatement += ", ";
+            }
+            sqlStatement += "'f'";
+            needForComma = true;
+        }
         sqlStatement += ")";
 
         //return statement if any input was entered
@@ -583,7 +607,14 @@ public class inventory_view implements ActionListener{
         }
         //Check is_menu_item is t or f
         if (input_data[0][5] != null && !input_data[0][5].isEmpty()) {
-            if (input_data[0][5] == "t" || input_data[0][5] == "f") {
+            if (input_data[0][5].equals("t") || input_data[0][5].equals("f")) {
+            } else {
+                return false;
+            }
+        }
+        //Check is_protein is t or f
+        if (input_data[0][6] != null && !input_data[0][6].isEmpty()) {
+            if (input_data[0][6].equals("t") || input_data[0][6].equals("f")) {
             } else {
                 return false;
             }
