@@ -96,7 +96,7 @@ public class inventory_view implements ActionListener{
         f.setVisible(true);       
     }
 
-    /** getData() sends a jdbc query to the database to get the inventory data and return it
+    /** getData() sends a jdbc query to the database to get the inventory data and return it.
      * @author Asger Schelde Larsen
      * @param none
      * @return {String[][]} data
@@ -130,7 +130,7 @@ public class inventory_view implements ActionListener{
             ResultSet result = stmt.executeQuery(sqlStatement);
             result.next();
             int length = Integer.parseInt(result.getString("count"));
-            data = new String[length][6];
+            data = new String[length][7];
 
             sqlStatement = "SELECT * FROM inventory ORDER BY food_id ASC";
             //send statement to DBMS
@@ -144,6 +144,7 @@ public class inventory_view implements ActionListener{
                 data[entry_nr][3] = result.getString("max_count")+"\n";
                 data[entry_nr][4] = result.getString("sell_price")+"\n";
                 data[entry_nr][5] = result.getString("is_menu_item")+"\n";
+                data[entry_nr][6] = result.getString("is_protein")+"\n";
                 entry_nr++;
             }
             conn.close();
@@ -546,7 +547,7 @@ public class inventory_view implements ActionListener{
     /** checkInputTypeOk() checks that all user inputs can be parsed from String to the desired type.
     * @author Asger Schelde Larsen
     * @param none
-    * @return {String} sqlStatement
+    * @return {Boolean}
     */
     public boolean checkInputTypeOk() {
         //Check ID is not null or empty
