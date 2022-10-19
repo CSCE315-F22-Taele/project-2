@@ -9,7 +9,7 @@ import java.sql.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-//@author Semion Dyadkin
+// @author Semion Dyadkin
 public class login_view implements ActionListener {
     private static JLabel username;
     private static JTextField userText;
@@ -19,25 +19,30 @@ public class login_view implements ActionListener {
     private static JLabel success;
     
 
-        //GUI
-        JPanel panel = new JPanel();
-        JFrame frame = new JFrame();
+    // GUI
+    JPanel panel = new JPanel();
+    JFrame frame = new JFrame();
+
+    // login_view constructor 
     login_view(){
+        // frame
         frame.setSize(400, 200);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setVisible(true);
         frame.add(panel);
 
+        // panel
         panel.setLayout(null);
         username = new JLabel("Username");
         username.setBounds(10, 20, 80, 25);
         panel.add(username);
 
+        // username field
         userText = new JTextField(20);
         userText.setBounds(100, 25, 165, 20);
         panel.add(userText);
 
-
+        // password field
         password = new JLabel("Password");
         password.setBounds(10, 50, 80, 25);
         panel.add(password);
@@ -56,16 +61,20 @@ public class login_view implements ActionListener {
         success.setBounds(10, 110, 300, 25);
         panel.add(success);
 
-        //frame.pack();
         panel.revalidate();
         panel.repaint();
         frame.setVisible(true);
         
     }
 
+    // When login is clicked, this function will check the username field first
+    // if its in database. If its not, it will tell you that username is wrong, if you entered
+    // an incorrect password to an exisiting username, you will get username is wrong.
+    // If a server logged in, they will see only what a server should see: order entries.
+    // If its a manager that's logged, he will see only what a manager should see, manager view.
     public void actionPerformed(ActionEvent event){
 
-        //building sql connection 
+        // building sql connection 
         Connection conn = null;
         String teamNumber = "22";
         String sectionNumber = "913";
@@ -83,9 +92,11 @@ public class login_view implements ActionListener {
     
 
         String user = userText.getText();
-        boolean id_flag = false; // false/odd is manager and true/even is server
+        // false is manager and true is server
+        boolean id_flag = false; 
         String temp_user = user; 
         try {  
+            // Manager is odd numbers, server is even numbers
             if(Integer.parseInt(temp_user) % 2 == 0){
                 id_flag = true;
             }
@@ -97,38 +108,34 @@ public class login_view implements ActionListener {
         }
         String password = passText.getText();
         try{
-            // while(true){
-                Statement stmt = conn.createStatement();
-                String sqlStatement = "SELECT password FROM manager WHERE manager_id = " + user;
-                if(id_flag){
-                    sqlStatement = "SELECT password FROM server WHERE server_id = " + user;
-                }
-                ResultSet result = stmt.executeQuery(sqlStatement);
-                if(!result.next()){
-                    success.setText("Username entered is incorrect");
-                    return;
-                }
-                String pass = result.getString("password");
+            Statement stmt = conn.createStatement();
+            String sqlStatement = "SELECT password FROM manager WHERE manager_id = " + user;
+            if(id_flag){
+                sqlStatement = "SELECT password FROM server WHERE server_id = " + user;
+            }
+            ResultSet result = stmt.executeQuery(sqlStatement);
+            if(!result.next()){
+                success.setText("Username entered is incorrect");
+                return;
+            }
+            String pass = result.getString("password");
         
-                // if(pass.length() == 0){
-                //     success.setText("Username entered is incorrect");
-                // }
-                
-                if(!password.equals(pass)){
-                    success.setText("Password entered is incorrect");
+            if(!password.equals(pass)){
+                success.setText("Password entered is incorrect");
+            }
+            else{
+                success.setText("Successfully logged in");
+                // server logs in
+                if(id_flag == true){
+                    new Demo();
+                    frame.dispose();
                 }
+                // Manager logs in
                 else{
-                    success.setText("Successfully logged in");
-                    if(id_flag == true){
-                        new Demo();
-                        frame.dispose();
-                    }
-                    else{
-                        new manager_view();
-                        frame.dispose();
-                    }
+                    new manager_view();
+                    frame.dispose();
                 }
-            //}
+            }
         }
         catch (Exception e){
             e.printStackTrace();
@@ -137,6 +144,7 @@ public class login_view implements ActionListener {
         }
     }
 
+    // function to check if a string is an int
     public static boolean isNumeric(String str) { 
         try {  
           Integer.parseInt(str);

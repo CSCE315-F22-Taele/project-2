@@ -24,6 +24,8 @@ public class manager_view extends JFrame implements ActionListener {
 
     private enum Actions {
         BTN2,
+        BTN3,
+        BTN4,
         GOODBYE
     }
 
@@ -33,6 +35,8 @@ public class manager_view extends JFrame implements ActionListener {
     private JTextField txtfld3;
     private JButton btn1;
     private JButton btn2;
+    private JButton btn3;
+    private JButton btn4;
     private JTextArea txtArea1;
 
 
@@ -83,8 +87,18 @@ public class manager_view extends JFrame implements ActionListener {
 
         // create button for all current menu items in the inventory
         btn1 = new JButton("VIEW CURRENT ITEMS");
-        btn1.setBounds(35, 150, 350, 30);
+        btn1.setBounds(35, 150, 300, 30);
         btn1.addActionListener(this);
+
+        // create button for signing out 
+        btn3 = new JButton("Sign Out");
+        btn3.setBounds(300, 0, 150, 20);
+        btn3.addActionListener(this);
+
+        // create button for checking inventory 
+        btn4 = new JButton("INVENTORY");
+        btn4.setBounds(350, 150, 300, 30);
+        btn4.addActionListener(this);
 
         String[] items = {
                 "Chicken",
@@ -109,14 +123,6 @@ public class manager_view extends JFrame implements ActionListener {
         txtfld3.setText(dt.toString());
         txtfld3.setBounds(260, 285, 100, 20);
 
-
-        // create button for specific item and specific date
-//        btn2 = new JButton("Sum of Chicken");
-//        btn2.setBounds(35, 360, 350, 30);
-//        btn2.setActionCommand(Actions.BTN2.name());
-//        btn2.addActionListener(this);
-//        btn2.addActionListener(this);
-        // "SELECT * FROM order_entries WHERE date BETWEEN 'start' AND 'end';"
 
         lbl4 = new JLabel("CHICKEN BOWLS SOLD IN CURRENT DATE:");
         lbl4.setBounds(35, 360, 300, 10);
@@ -182,13 +188,26 @@ public class manager_view extends JFrame implements ActionListener {
 
         pane.add(btn1);
 //        pane.add(btn2);
-
+        pane.add(btn3);
+        pane.add(btn4);
     }
 
 
     // prompts user that the analysis is completed
     @Override
     public void actionPerformed(ActionEvent e) {
+        if(e.getSource() == btn3){
+            new login_view();
+            dispose();
+            return;
+        }
+
+        if(e.getSource() == btn4){
+            new inventory_view();
+            dispose();
+            return;
+        }
+
         if (e.getActionCommand() != Actions.BTN2.name()) {
             // frame
             JFrame f;
