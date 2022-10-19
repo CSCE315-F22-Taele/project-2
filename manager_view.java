@@ -49,6 +49,7 @@ public class manager_view extends JFrame implements ActionListener {
 //        GUI.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         this.setSize(760, 768);
         this.setTitle("MANAGER VIEW");
+        this.setExtendedState(JFrame.MAXIMIZED_BOTH);
         this.setVisible(true);
         this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
     }
@@ -89,7 +90,7 @@ public class manager_view extends JFrame implements ActionListener {
 
         // create button for all current menu items in the inventory
         btn1 = new JButton("VIEW CURRENT ITEMS");
-        btn1.setBounds(35, 150, 350, 30);
+        btn1.setBounds(35, 150, 300, 30);
         btn1.addActionListener(this);
 
 
@@ -267,7 +268,7 @@ public class manager_view extends JFrame implements ActionListener {
             JScrollPane sp = new JScrollPane(j);
             f.add(sp);
             // Frame Size
-            f.setSize(760, 375);
+            f.setExtendedState(JFrame.MAXIMIZED_BOTH);
             f.setVisible(true);
         }
     }

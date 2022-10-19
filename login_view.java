@@ -22,7 +22,6 @@ public class login_view implements ActionListener {
     // GUI
     JPanel panel = new JPanel();
     JFrame frame = new JFrame();
-
     // login_view constructor 
     login_view(){
         // frame
@@ -63,6 +62,7 @@ public class login_view implements ActionListener {
 
         panel.revalidate();
         panel.repaint();
+        frame.setExtendedState(JFrame.MAXIMIZED_BOTH); 
         frame.setVisible(true);
         
     }
