@@ -34,21 +34,37 @@ public class inventory_view implements ActionListener{
         f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         f.getContentPane().setLayout(new BoxLayout(f.getContentPane(), BoxLayout.Y_AXIS));
 
+        // Setup the main JPanel for the inventory screen
+        p = new JPanel(new BorderLayout(10,10));
+        JPanel table_panel = new JPanel(new BorderLayout(10,10));
+
+        // Create JPanel for table and title
+        JLabel title = new JLabel("INVENTORY", SwingConstants.CENTER);
+        title.setFont(new Font(title.getFont().toString(), Font.PLAIN, 25));
+        table_panel.add(title,BorderLayout.PAGE_START);
+
         // setup table with data from database
         data = getData();
         table = new JTable(data,columns);
         table.setBounds(30,40,200,300);          
         JScrollPane sp=new JScrollPane(table);    
-        f.getContentPane().add(sp);
+        table_panel.add(sp, BorderLayout.CENTER);
+        p.add(table_panel, BorderLayout.PAGE_START);
 
-        // Setup the main JPanel for the inventory screen
-        p = new JPanel(new BorderLayout());
+        // Create JPanel for inputs
+        JPanel input_panel = new JPanel(new BorderLayout(10,10));
+
+        JLabel input_title = new JLabel("Edit inventory:", SwingConstants.CENTER);
+        input_title.setFont(new Font(title.getFont().toString(), Font.PLAIN, 15));
+        input_panel.add(input_title,BorderLayout.PAGE_START);
 
         // Setup table for input data and add to JPanel
         input_data = new String[1][6];
         input = new JTable(input_data,columns);
         input.setBounds(30,40,200,300);
-        p.add(input, BorderLayout.PAGE_START);
+        input_panel.add(input, BorderLayout.CENTER);
+
+        p.add(input_panel, BorderLayout.CENTER);
 
         // Create buttons and actionlisteners
         JPanel pButtons = new JPanel(new FlowLayout());
@@ -71,14 +87,13 @@ public class inventory_view implements ActionListener{
         pButtons.add(stockReport);
         pButtons.add(back);
 
-        p.add(pButtons, BorderLayout.CENTER);
+        p.add(pButtons, BorderLayout.PAGE_END);
         
         f.getContentPane().add(p);
         f.setSize(300,400);
         f.pack();
+        f.setExtendedState(JFrame.MAXIMIZED_BOTH);
         f.setVisible(true);       
-        f.setBounds(100, 100, 768, 768);
-        
     }
 
     /** getData() sends a jdbc query to the database to get the inventory data and return it
@@ -138,7 +153,12 @@ public class inventory_view implements ActionListener{
         return data;
     }
 
-    /** actionPerformed handles actions to beformed when a button is clicked
+    /** actionPerformed() handles actions to beformed when a button is clicked. 
+     *  When 'back' is clicked returns to manager_view.
+     *  When 'Add Item' is clicked the input is added to the database.
+     *  When 'Update Item' is clicked the changed inputs field are updated in the database.
+     *  When 'Delete is clicked the item with the input ID is deleted in the database.'
+     *  When 'Show Restock Report' is clicked a window showing the restock report is shown.
     * @author Asger Schelde Larsen
     * @param none
     * @return none
@@ -230,9 +250,12 @@ public class inventory_view implements ActionListener{
             try {
                 Statement stmt = conn.createStatement();
                 try {
+                    // Check that ID inout can parse to integer.
                     Integer.parseInt(input_data[0][0]);
 
                     String sqlStatement = "DELETE FROM inventory WHERE food_id = " + input_data[0][0];
+
+                    // Execute statement if ID does not already exist
                     if (checkIdExists(stmt) >= 0) {
                         stmt.executeUpdate(sqlStatement);
                         updateTable();
@@ -275,7 +298,7 @@ public class inventory_view implements ActionListener{
         }
     }
 
-    /** getRestockReport returns a 2D-array with all inventory items with a current_count lower or equal to 20% of max_count
+    /** getRestockReport() returns a 2D-array with all inventory items with a current_count lower or equal to 20% of max_count
     * @author Asger Schelde Larsen
     * @param none
     * @return {String[][]} data
@@ -332,7 +355,7 @@ public class inventory_view implements ActionListener{
         return data;
     }
 
-    /** updateTable() updates the Model for the table with newest data
+    /** updateTable() updates the Model for the table with newest data from the database.
     * @author Asger Schelde Larsen
     * @param none
     * @return none
@@ -356,10 +379,13 @@ public class inventory_view implements ActionListener{
         //Make query using input data
         boolean needForComma = false;
         String sqlStatement = "UPDATE inventory SET ";
+
+        // Checking if Name has an input.
         if (input_data[0][1] != null && !input_data[0][1].isEmpty()) {
             sqlStatement += "food_name = '" + input_data[0][1]+"'";
             needForComma = true;
         }
+        // Checking if current_count has an input.
         if (input_data[0][2] != null && !input_data[0][2].isEmpty()) {
             if (needForComma) {
                 sqlStatement += ", ";
@@ -367,6 +393,7 @@ public class inventory_view implements ActionListener{
             sqlStatement += "current_count = " + input_data[0][2];
             needForComma = true;
         }
+        // Checking if max_count has an input.
         if (input_data[0][3] != null && !input_data[0][3].isEmpty()) {
             if (needForComma) {
                 sqlStatement += ", ";
@@ -374,6 +401,7 @@ public class inventory_view implements ActionListener{
             sqlStatement += "max_count = " + input_data[0][3];
             needForComma = true;
         }
+        // Checking if price has an input.
         if (input_data[0][4] != null && !input_data[0][4].isEmpty()) {
             if (needForComma) {
                 sqlStatement += ", ";
@@ -381,6 +409,7 @@ public class inventory_view implements ActionListener{
             sqlStatement += "sell_price = " + input_data[0][4];
             needForComma = true;
         }
+        // Checking if is_menu_item has an input.
         if (input_data[0][5] != null && !input_data[0][5].isEmpty()) {
             if (needForComma) {
                 sqlStatement += ", ";
@@ -407,10 +436,13 @@ public class inventory_view implements ActionListener{
         //Make query using input data
         boolean needForComma = false;
         String sqlStatement = "INSERT INTO inventory VALUES (";
+
+        // Checking if ID has an input
         if (input_data[0][0] != null && !input_data[0][0].isEmpty()) {
             sqlStatement += input_data[0][0];
             needForComma = true;
         }
+        // Checking if Name has an input. Otherwise replace with 'null'
         if (input_data[0][1] != null && !input_data[0][1].isEmpty()) {
             if (needForComma) {
                 sqlStatement += ", ";
@@ -424,6 +456,7 @@ public class inventory_view implements ActionListener{
             sqlStatement += "null";
             needForComma = true;
         }
+        // Checking if current_count has an input. Otherwise set to 0
         if (input_data[0][2] != null && !input_data[0][2].isEmpty()) {
             if (needForComma) {
                 sqlStatement += ", ";
@@ -437,6 +470,7 @@ public class inventory_view implements ActionListener{
             sqlStatement += 0;
             needForComma = true;
         }
+        // Checking if max_count has an input. Otherwise set to 0
         if (input_data[0][3] != null && !input_data[0][3].isEmpty()) {
             if (needForComma) {
                 sqlStatement += ", ";
@@ -450,6 +484,7 @@ public class inventory_view implements ActionListener{
             sqlStatement += 0;
             needForComma = true;
         }
+        // Checking if Price has an input. Otherwise set to 'null'
         if (input_data[0][4] != null && !input_data[0][4].isEmpty()) {
             if (needForComma) {
                 sqlStatement += ", ";
@@ -463,6 +498,7 @@ public class inventory_view implements ActionListener{
             sqlStatement += "null";
             needForComma = true;
         }
+        //Check if Is_menu_item has an input. Otherwise set to 'f'
         if (input_data[0][5] != null && !input_data[0][5].isEmpty()) {
             if (needForComma) {
                 sqlStatement += ", ";
@@ -486,9 +522,10 @@ public class inventory_view implements ActionListener{
         }
     }
 
-    /** checkIdExists() executes a query to check if the given ID exists in the inventory table.
+    /** checkIdExists() executes a query to check if the given ID exists in the inventory table. 
+     *  Returns -1 if ID does not exist and 1 if the ID exists.
     * @author Asger Schelde Larsen
-    * @param none
+    * @param {Statement} stmt 
     * @return {int}
     */
     public int checkIdExists(Statement stmt) {
@@ -496,6 +533,7 @@ public class inventory_view implements ActionListener{
             try {
                 ResultSet result = stmt.executeQuery(checkIdExistsStmt);
                 result.next();
+                // Check the result can parse to integer
                 return Integer.parseInt(result.getString("count"));
             } catch (Exception e) {
                 e.printStackTrace();
@@ -515,7 +553,7 @@ public class inventory_view implements ActionListener{
         if (input_data[0][0] == null || input_data[0][0].isEmpty()) {
             return false;
         }
-        //Check ID, count can convert to int
+        //Check ID, current_count and max_count can convert to int
         try {
             Integer.parseInt(input_data[0][0]);
         } catch(Exception e) {
