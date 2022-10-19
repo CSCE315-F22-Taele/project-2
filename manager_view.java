@@ -29,7 +29,7 @@ public class manager_view extends JFrame implements ActionListener {
 
     private static final long serialVersionUID = 1L;
 
-    private JLabel introLbl, lbl1, lbl2, lbl3, lbl4, txtfld1, txtfld2, txtfld4;
+    private JLabel introLbl, lbl1, lbl2, lbl3, lbl4, lbl5, lbl6, lbl7, lbl8, lbl9, txtfld1, txtfld2, txtfld4, txtfld5, txtfld6, txtfld7, txtfld8, txtfld9;
     private JTextField txtfld3;
     private JButton btn1;
     private JButton btn2;
@@ -102,7 +102,7 @@ public class manager_view extends JFrame implements ActionListener {
 
 
         // third label
-        lbl3 = new JLabel("Enter start date in YYYY-MM-DD format: ");
+        lbl3 = new JLabel("Itemized revenue up to today in YYYY-MM-DD format: ");
         lbl3.setBounds(35, 285, 250, 20);
         txtfld3 = new JTextField();
         LocalDate dt = java.time.LocalDate.now();
@@ -117,12 +117,44 @@ public class manager_view extends JFrame implements ActionListener {
 //        btn2.addActionListener(this);
 //        btn2.addActionListener(this);
         // "SELECT * FROM order_entries WHERE date BETWEEN 'start' AND 'end';"
-        // second label
-        lbl4 = new JLabel("TOTAL CHICKEN SOLD IN DATE RANGE:");
-        lbl4.setBounds(35, 490, 250, 20);
+
+        lbl4 = new JLabel("CHICKEN BOWLS SOLD IN CURRENT DATE:");
+        lbl4.setBounds(35, 360, 300, 10);
         txtfld4 = new JLabel();
-        txtfld4.setText("$" + getChickenTotal());
-        txtfld4.setBounds(270, 490, 100, 20);
+        txtfld4.setText("$" + getChickenBowlTotal());
+        txtfld4.setBounds(425, 360, 100, 10);
+
+        lbl5 = new JLabel("CHICKEN BURRITOS SOLD IN CURRENT DATE:");
+        lbl5.setBounds(35, 390, 300, 10);
+        txtfld5 = new JLabel();
+        txtfld5.setText("$" + getChickenBurritoTotal());
+        txtfld5.setBounds(425, 390, 100, 10);
+
+
+        lbl6 = new JLabel("STEAK BOWLS SOLD IN CURRENT DATE:");
+        lbl6.setBounds(35, 420, 300, 10);
+        txtfld6 = new JLabel();
+        txtfld6.setText("$" + getSteakBowlTotal());
+        txtfld6.setBounds(425, 420, 100, 10);
+
+        lbl7 = new JLabel("STEAK BURRITOS SOLD IN CURRENT DATE:");
+        lbl7.setBounds(35, 450, 300, 10);
+        txtfld7 = new JLabel();
+        txtfld7.setText("$" + getSteakBurritoTotal());
+        txtfld7.setBounds(425, 450, 100, 10);
+
+
+        lbl8 = new JLabel("BEEF BOWLS SOLD IN CURRENT DATE:");
+        lbl8.setBounds(35, 480, 300, 10);
+        txtfld8 = new JLabel();
+        txtfld8.setText("$" + getBeefBowlTotal());
+        txtfld8.setBounds(425, 480, 100, 10);
+
+        lbl9 = new JLabel("BEEF BURRITOS SOLD IN CURRENT DATE:");
+        lbl9.setBounds(35, 510, 300, 10);
+        txtfld9 = new JLabel();
+        txtfld9.setText("$" + getBeefBurritoTotal());
+        txtfld9.setBounds(425, 510, 100, 10);
 
         // add to pane
         pane.add(introLbl);
@@ -130,11 +162,23 @@ public class manager_view extends JFrame implements ActionListener {
         pane.add(lbl2);
         pane.add(lbl3);
         pane.add(lbl4);
+        pane.add(lbl5);
+        pane.add(lbl6);
+        pane.add(lbl7);
+        pane.add(lbl8);
+        pane.add(lbl9);
 
         pane.add(txtfld1);
         pane.add(txtfld2);
         pane.add(txtfld3);
         pane.add(txtfld4);
+        pane.add(txtfld5);
+        pane.add(txtfld6);
+        pane.add(txtfld7);
+        pane.add(txtfld8);
+        pane.add(txtfld9);
+
+
 
         pane.add(btn1);
 //        pane.add(btn2);
@@ -146,12 +190,6 @@ public class manager_view extends JFrame implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getActionCommand() != Actions.BTN2.name()) {
-//            lbl4 = new JLabel("TOTAL SALES FOR CHICKEN:");
-//            lbl4.setBounds(35, 400, 150, 20);
-//            txtfld4 = new JLabel();
-//            txtfld4.setText("$" + getChickenTotal());
-//        }
-//        else {
             // frame
             JFrame f;
             // Table
@@ -286,8 +324,8 @@ public class manager_view extends JFrame implements ActionListener {
     }
 
     // helper function to get the sum of profits in today's operating hours
-    static double getChickenTotal() {
-        double sumChicken = 0.0;
+    static double getChickenBurritoTotal() {
+        double sumChickenBurrito = 0.0;
         // establish database setup information
         Connection conn = null;
         String teamNumber = "22";
@@ -314,19 +352,243 @@ public class manager_view extends JFrame implements ActionListener {
 
             // will not work if there are no orders in today's date
             // SO YOU MUST INSERT AN ORDER ENTRY BEFORE RUNNING THE MANAGER VIEW PAGE
-            ResultSet res = stmt.executeQuery("SELECT SUM(cost) FROM order_entries WHERE protein='Chicken' AND date BETWEEN NOW() - INTERVAL '24 HOURS' AND NOW();");
+            ResultSet res = stmt.executeQuery("SELECT SUM(cost) FROM order_entries WHERE protein='Chicken' AND base='Burrito';");
 
             // pull into table
             while (res.next()) {
                 double tmp = res.getFloat(1);
-                sumChicken = sumChicken + tmp;
+                sumChickenBurrito = sumChickenBurrito + tmp;
             }
-            sumChicken = Math.round(sumChicken*100.0)/100.0;
+            sumChickenBurrito = Math.round(sumChickenBurrito*100.0)/100.0;
 //            System.out.println(sumToday);
         } catch(Exception e){
             JOptionPane.showMessageDialog(null,"Error accessing Database.");
         }
-        return sumChicken;
+        return sumChickenBurrito;
+    }
+
+
+    // helper function to get the sum of profits in today's operating hours
+    static double getChickenBowlTotal() {
+        double sumChickenBowl = 0.0;
+        // establish database setup information
+        Connection conn = null;
+        String teamNumber = "22";
+        String sectionNumber = "913";
+        String dbName = "csce315_" + sectionNumber + "_" + teamNumber ;
+        String dbConnectionString = "jdbc.;postgresql://csce-315-db.engr.tamu.edu/" + dbName;
+
+        // Connecting to the database
+        try {
+            Class.forName("org.postgresql.Driver");
+            conn = DriverManager.getConnection("jdbc:postgresql://csce-315-db.engr.tamu.edu/csce315_913_22",
+                    "csce315_913_kutsch", "830002561");
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.err.println(e.getClass().getName()+": "+e.getMessage());
+            System.exit(0);
+        }
+
+//        System.out.println("Opened database successfully");
+
+        try{
+            // create a statement object
+            Statement stmt = conn.createStatement();
+
+            // will not work if there are no orders in today's date
+            // SO YOU MUST INSERT AN ORDER ENTRY BEFORE RUNNING THE MANAGER VIEW PAGE
+            ResultSet res = stmt.executeQuery("SELECT SUM(cost) FROM order_entries WHERE protein='Chicken' AND base='Bowl';");
+
+            // pull into table
+            while (res.next()) {
+                double tmp = res.getFloat(1);
+                sumChickenBowl = sumChickenBowl + tmp;
+            }
+            sumChickenBowl = Math.round(sumChickenBowl*100.0)/100.0;
+//            System.out.println(sumToday);
+        } catch(Exception e){
+            JOptionPane.showMessageDialog(null,"Error accessing Database.");
+        }
+        return sumChickenBowl;
+    }
+
+    // helper function to get the sum of profits in today's operating hours
+    static double getSteakBurritoTotal() {
+        double sumSteakBurrito = 0.0;
+        // establish database setup information
+        Connection conn = null;
+        String teamNumber = "22";
+        String sectionNumber = "913";
+        String dbName = "csce315_" + sectionNumber + "_" + teamNumber ;
+        String dbConnectionString = "jdbc.;postgresql://csce-315-db.engr.tamu.edu/" + dbName;
+
+        // Connecting to the database
+        try {
+            Class.forName("org.postgresql.Driver");
+            conn = DriverManager.getConnection("jdbc:postgresql://csce-315-db.engr.tamu.edu/csce315_913_22",
+                    "csce315_913_kutsch", "830002561");
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.err.println(e.getClass().getName()+": "+e.getMessage());
+            System.exit(0);
+        }
+
+//        System.out.println("Opened database successfully");
+
+        try{
+            // create a statement object
+            Statement stmt = conn.createStatement();
+
+            // will not work if there are no orders in today's date
+            // SO YOU MUST INSERT AN ORDER ENTRY BEFORE RUNNING THE MANAGER VIEW PAGE
+            ResultSet res = stmt.executeQuery("SELECT SUM(cost) FROM order_entries WHERE protein='Steak' AND base='Burrito';");
+
+            // pull into table
+            while (res.next()) {
+                double tmp = res.getFloat(1);
+                sumSteakBurrito = sumSteakBurrito + tmp;
+            }
+            sumSteakBurrito = Math.round(sumSteakBurrito*100.0)/100.0;
+//            System.out.println(sumToday);
+        } catch(Exception e){
+            JOptionPane.showMessageDialog(null,"Error accessing Database.");
+        }
+        return sumSteakBurrito;
+    }
+
+
+    // helper function to get the sum of profits in today's operating hours
+    static double getSteakBowlTotal() {
+        double sumSteakBowl = 0.0;
+        // establish database setup information
+        Connection conn = null;
+        String teamNumber = "22";
+        String sectionNumber = "913";
+        String dbName = "csce315_" + sectionNumber + "_" + teamNumber ;
+        String dbConnectionString = "jdbc.;postgresql://csce-315-db.engr.tamu.edu/" + dbName;
+
+        // Connecting to the database
+        try {
+            Class.forName("org.postgresql.Driver");
+            conn = DriverManager.getConnection("jdbc:postgresql://csce-315-db.engr.tamu.edu/csce315_913_22",
+                    "csce315_913_kutsch", "830002561");
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.err.println(e.getClass().getName()+": "+e.getMessage());
+            System.exit(0);
+        }
+
+//        System.out.println("Opened database successfully");
+
+        try{
+            // create a statement object
+            Statement stmt = conn.createStatement();
+
+            // will not work if there are no orders in today's date
+            // SO YOU MUST INSERT AN ORDER ENTRY BEFORE RUNNING THE MANAGER VIEW PAGE
+            ResultSet res = stmt.executeQuery("SELECT SUM(cost) FROM order_entries WHERE protein='Steak' AND base='Bowl';");
+
+            // pull into table
+            while (res.next()) {
+                double tmp = res.getFloat(1);
+                sumSteakBowl = sumSteakBowl + tmp;
+            }
+            sumSteakBowl = Math.round(sumSteakBowl*100.0)/100.0;
+//            System.out.println(sumToday);
+        } catch(Exception e){
+            JOptionPane.showMessageDialog(null,"Error accessing Database.");
+        }
+        return sumSteakBowl;
+    }
+
+
+    // helper function to get the sum of profits in today's operating hours
+    static double getBeefBurritoTotal() {
+        double sumBeefBurrito = 0.0;
+        // establish database setup information
+        Connection conn = null;
+        String teamNumber = "22";
+        String sectionNumber = "913";
+        String dbName = "csce315_" + sectionNumber + "_" + teamNumber ;
+        String dbConnectionString = "jdbc.;postgresql://csce-315-db.engr.tamu.edu/" + dbName;
+
+        // Connecting to the database
+        try {
+            Class.forName("org.postgresql.Driver");
+            conn = DriverManager.getConnection("jdbc:postgresql://csce-315-db.engr.tamu.edu/csce315_913_22",
+                    "csce315_913_kutsch", "830002561");
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.err.println(e.getClass().getName()+": "+e.getMessage());
+            System.exit(0);
+        }
+
+//        System.out.println("Opened database successfully");
+
+        try{
+            // create a statement object
+            Statement stmt = conn.createStatement();
+
+            // will not work if there are no orders in today's date
+            // SO YOU MUST INSERT AN ORDER ENTRY BEFORE RUNNING THE MANAGER VIEW PAGE
+            ResultSet res = stmt.executeQuery("SELECT SUM(cost) FROM order_entries WHERE protein='Beef' AND base='Burrito';");
+
+            // pull into table
+            while (res.next()) {
+                double tmp = res.getFloat(1);
+                sumBeefBurrito = sumBeefBurrito + tmp;
+            }
+            sumBeefBurrito = Math.round(sumBeefBurrito*100.0)/100.0;
+//            System.out.println(sumToday);
+        } catch(Exception e){
+            JOptionPane.showMessageDialog(null,"Error accessing Database.");
+        }
+        return sumBeefBurrito;
+    }
+
+
+    // helper function to get the sum of profits in today's operating hours
+    static double getBeefBowlTotal() {
+        double sumBeefBowl = 0.0;
+        // establish database setup information
+        Connection conn = null;
+        String teamNumber = "22";
+        String sectionNumber = "913";
+        String dbName = "csce315_" + sectionNumber + "_" + teamNumber ;
+        String dbConnectionString = "jdbc.;postgresql://csce-315-db.engr.tamu.edu/" + dbName;
+
+        // Connecting to the database
+        try {
+            Class.forName("org.postgresql.Driver");
+            conn = DriverManager.getConnection("jdbc:postgresql://csce-315-db.engr.tamu.edu/csce315_913_22",
+                    "csce315_913_kutsch", "830002561");
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.err.println(e.getClass().getName()+": "+e.getMessage());
+            System.exit(0);
+        }
+
+//        System.out.println("Opened database successfully");
+
+        try{
+            // create a statement object
+            Statement stmt = conn.createStatement();
+
+            // will not work if there are no orders in today's date
+            // SO YOU MUST INSERT AN ORDER ENTRY BEFORE RUNNING THE MANAGER VIEW PAGE
+            ResultSet res = stmt.executeQuery("SELECT SUM(cost) FROM order_entries WHERE protein='Beef' AND base='Bowl';");
+
+            // pull into table
+            while (res.next()) {
+                double tmp = res.getFloat(1);
+                sumBeefBowl = sumBeefBowl + tmp;
+            }
+            sumBeefBowl = Math.round(sumBeefBowl*100.0)/100.0;
+//            System.out.println(sumToday);
+        } catch(Exception e){
+            JOptionPane.showMessageDialog(null,"Error accessing Database.");
+        }
+        return sumBeefBowl;
     }
 
 
