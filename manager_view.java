@@ -23,14 +23,16 @@ public class manager_view extends JFrame implements ActionListener {
     private enum Actions {
         BTN2,
         BTN3,
-        BTN4
+        BTN4,
+        BTN5
     }
 
     private static final long serialVersionUID = 1L;
 
     private JLabel introLbl, lbl1, lbl2, lbl3, lbl4, lbl5, lbl6, lbl7, lbl8, lbl9, lbl10, lbl11, lbl12, txtfld1, txtfld2, txtfld4, txtfld5, txtfld6, txtfld7, txtfld8, txtfld9, txtfld10, txtfld11, txtfld12;
     private JTextField txtfld3;
-    private JButton btn1, btn3, btn4;
+    private JTextField txtfldTimeStamp;
+    private JButton btn1, btn3, btn4, btn5;
 //    private JButton btn2;
     private JTextArea txtArea1;
 
@@ -103,6 +105,11 @@ public class manager_view extends JFrame implements ActionListener {
         btn4 = new JButton("INVENTORY");
         btn4.setBounds(350, 150, 300, 30);
         btn4.addActionListener(this);
+
+        // create button for checking excess report
+        btn5 = new JButton("EXCESS REPORT");
+        btn5.setBounds(665, 150, 300, 30);
+        btn5.addActionListener(this);
 
         String[] items = {
                 "Chicken",
@@ -217,7 +224,7 @@ public class manager_view extends JFrame implements ActionListener {
 //        pane.add(btn2);
         pane.add(btn3);
         pane.add(btn4);
-
+        pane.add(btn5);
     }
 
     /** actionPerformed(ActionEvent e) takes care of the creation of the "Today's Transactions" Table
@@ -241,6 +248,37 @@ public class manager_view extends JFrame implements ActionListener {
             new inventory_view();
             dispose();
             return;
+        }
+        if(e.getSource() == btn5){
+            String Date = JOptionPane.showInputDialog("Timestamp(MM/DD/YYYY)");
+            JFrame f;
+            // Table
+            JTable j;
+
+            f = new JFrame();
+
+            // Frame Title
+            f.setTitle("EXCESS REPORT: " + java.time.LocalDate.now());
+
+            // pull all the menu items from the inventory to be displayed
+            String[][] inv = getInventory();
+
+            // Column Names
+            String[] columnNames = {"food_id", "food_name"};
+
+
+            // Initializing the JTable
+            j = new JTable(inv, columnNames);
+            j.setBounds(30, 40, 200, 500);
+
+            // adding it to JScrollPane
+            JScrollPane sp = new JScrollPane(j);
+            f.add(sp);
+            // Frame Size
+            f.setExtendedState(JFrame.MAXIMIZED_BOTH);
+            f.setVisible(true);
+            return;
+        
         }
         if (e.getActionCommand() != Actions.BTN2.name()) {
             // frame
