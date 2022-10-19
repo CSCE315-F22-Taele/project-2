@@ -242,8 +242,8 @@ public class manager_view extends JFrame implements ActionListener {
         String sectionNumber = "913";
         String dbName = "csce315_" + sectionNumber + "_" + teamNumber ;
         String dbConnectionString = "jdbc:postgresql://csce-315-db.engr.tamu.edu/" + dbName;
-        new dbSetup(); 
-    
+        new dbSetup();
+
         //Connecting to the database
         try {
             conn = DriverManager.getConnection(dbConnectionString, dbSetup.user, dbSetup.pswd);
@@ -253,7 +253,7 @@ public class manager_view extends JFrame implements ActionListener {
             System.exit(0);
         }
 
-          System.out.println("Opened database successfully");    
+        System.out.println("Opened database successfully");
 
 
         try {
@@ -267,10 +267,10 @@ public class manager_view extends JFrame implements ActionListener {
             int length = Integer.parseInt(result.getString("count"));
             //next_food_id = length; //used for seasonal item
             sqlStatement = "SELECT * FROM inventory ORDER BY food_id ASC";
-            
+
             result = stmt.executeQuery(sqlStatement);
 
-            
+
             String[][]temp = new String [length][3]; //used to get exact length of array needed for data
             int entry_nr = 0;
             while (result.next()) {
@@ -333,14 +333,14 @@ public class manager_view extends JFrame implements ActionListener {
                         ResultSet result_sold = stmt.executeQuery(sqlStatement);
                         result_sold.next();
                         int sold = Integer.parseInt(result_sold.getString("count"));
-                        
+
                         sqlStatement = "SELECT max_count FROM inventory WHERE food_name = '16oz_Fountain'";
                         ResultSet result_total = stmt.executeQuery(sqlStatement);
                         result_total.next();
                         double total = (double)Integer.parseInt(result_total.getString("max_count"));
                         System.out.println(food_name + ": " + sold + "/" + total);
 
-                        
+
                         if (sold/total < .1) {
                             newDataTemp[dataIter][0] = data[i][0];
                             newDataTemp[dataIter][1] = String.valueOf(sold/total);
@@ -352,14 +352,14 @@ public class manager_view extends JFrame implements ActionListener {
                         ResultSet result_sold = stmt.executeQuery(sqlStatement);
                         result_sold.next();
                         int sold = Integer.parseInt(result_sold.getString("count"));
-                        
+
                         sqlStatement = "SELECT max_count FROM inventory WHERE food_name = '22oz_Fountain'";
                         ResultSet result_total = stmt.executeQuery(sqlStatement);
                         result_total.next();
                         double total = (double)Integer.parseInt(result_total.getString("max_count"));
                         System.out.println(food_name + ": " + sold + "/" + total);
 
-                        
+
                         if (sold/total < .1) {
                             newDataTemp[dataIter][0] = data[i][0];
                             newDataTemp[dataIter][1] = String.valueOf(sold/total);
@@ -368,12 +368,12 @@ public class manager_view extends JFrame implements ActionListener {
                     } else {
                         food_name = food_name.replace("\n","");
                         System.out.println(food_name);
-    
+
                         sqlStatement = "SELECT COUNT(*) FROM order_entries WHERE "+ food_name + " = '1' AND date >= '"+ Date +"' AND date < CURRENT_DATE";
                         ResultSet result_sold = stmt.executeQuery(sqlStatement);
                         result_sold.next();
                         int sold = Integer.parseInt(result_sold.getString("count"));
-    
+
                         sqlStatement = "SELECT max_count FROM inventory WHERE food_name = '" + food_name + "'";
                         ResultSet result_total = stmt.executeQuery(sqlStatement);
                         result_total.next();
@@ -393,27 +393,27 @@ public class manager_view extends JFrame implements ActionListener {
             return newDataTemp;
 
 
-            
 
-            
-            
+
+
+
         } catch (Exception e) {
             e.printStackTrace();
             System.err.println(e.getClass().getName()+": "+e.getMessage());
             System.exit(0);
         }
-      
+
         //closing the connection
         try {
-          conn.close();
-          System.out.println("Connection Closed.");
+            conn.close();
+            System.out.println("Connection Closed.");
         } catch(Exception e) {
-          System.out.println("Connection NOT Closed.");
+            System.out.println("Connection NOT Closed.");
         }//end try catch
-        
+
         return data;
 
-      }
+    }
     /** actionPerformed(ActionEvent e) takes care of the creation of the "Today's Transactions" Table
      *
      * @param ActionEvent e -- 'this' in use case
@@ -485,7 +485,7 @@ public class manager_view extends JFrame implements ActionListener {
             String[][] inv = getSalesReport();
 
             // Column Names
-            String[] columnNames = {"protein", "guacamole", "chips_salsa", "chips_queso", "chips_guac", "brownie", "cookie", "drink_16oz", "drink_22oz", "cost"};
+            String[] columnNames = {"protein", "guacamole", "chips_salsa", "chips_queso", "chips_guac", "brownie", "cookie", "drink_16oz", "drink_22oz", "cost", "date"};
 
 
             // Initializing the JTable
@@ -636,7 +636,7 @@ public class manager_view extends JFrame implements ActionListener {
             ResultSet result = stmt.executeQuery(sqlStatement);
             result.next();
             int sz = Integer.parseInt(result.getString("count"));
-            inv = new String[sz][10];
+            inv = new String[sz][11];
 
             // SQL line that pulls all the menu items from the inventory sorted by their food id
             sqlStatement = "SELECT * FROM order_entries WHERE date BETWEEN '" + Date + "' AND '" + java.time.LocalDate.now()+ "';";
@@ -657,8 +657,9 @@ public class manager_view extends JFrame implements ActionListener {
                 inv[entry_nr][7] = result.getString("drink_16oz")+"\n";
                 inv[entry_nr][8] = result.getString("drink_22oz")+"\n";
                 inv[entry_nr][9] = result.getString("cost")+"\n";
+                inv[entry_nr][10] = result.getString("date")+"\n";
                 entry_nr++;
-                System.out.println(inv[0]+","+inv[1]+","+inv[2]+","+inv[3]+","+inv[4]+","+inv[5]+","+inv[6]+","+inv[7]+","+inv[8]+","+inv[9]);
+                System.out.println(inv[0]+","+inv[1]+","+inv[2]+","+inv[3]+","+inv[4]+","+inv[5]+","+inv[6]+","+inv[7]+","+inv[8]+","+inv[9]+","+inv[10]);
             }
         } catch(Exception e){
             JOptionPane.showMessageDialog(null,"Error accessing Database.");
