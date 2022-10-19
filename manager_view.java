@@ -234,7 +234,186 @@ public class manager_view extends JFrame implements ActionListener {
         pane.add(btn5);
         pane.add(btn7);
     }
+    public String[][] getData(String Date) { //string[] that contains [food_name] [sell_price]
+        String[][] data = new String[0][0];
+        String[][] newData = new String[0][0];
+        Connection conn = null;
+        String teamNumber = "22";
+        String sectionNumber = "913";
+        String dbName = "csce315_" + sectionNumber + "_" + teamNumber ;
+        String dbConnectionString = "jdbc:postgresql://csce-315-db.engr.tamu.edu/" + dbName;
+        new dbSetup(); 
+    
+        //Connecting to the database
+        try {
+            conn = DriverManager.getConnection(dbConnectionString, dbSetup.user, dbSetup.pswd);
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.err.println(e.getClass().getName()+": "+e.getMessage());
+            System.exit(0);
+        }
 
+          System.out.println("Opened database successfully");    
+
+
+        try {
+            Statement stmt = conn.createStatement();
+
+            String sqlStatement = "SELECT count(food_id) AS count FROM inventory";
+
+            //send statement to DBMS
+            ResultSet result = stmt.executeQuery(sqlStatement);
+            result.next();
+            int length = Integer.parseInt(result.getString("count"));
+            //next_food_id = length; //used for seasonal item
+            sqlStatement = "SELECT * FROM inventory ORDER BY food_id ASC";
+            
+            result = stmt.executeQuery(sqlStatement);
+
+            
+            String[][]temp = new String [length][3]; //used to get exact length of array needed for data
+            int entry_nr = 0;
+            while (result.next()) {
+
+                boolean is_menu_item = result.getBoolean("is_menu_item");
+
+                if (is_menu_item) {
+                    temp[entry_nr][0] = result.getString("food_name")+"\n";
+                    temp[entry_nr][1] = result.getString("sell_price")+"\n";
+
+
+                    String is_prot = Boolean.toString(result.getBoolean("is_protein"));
+                    temp[entry_nr][2] = is_prot+"\n";
+                    entry_nr++;
+                }
+
+            }
+            data = new String[entry_nr][3];
+
+            for (int i = 0; i < entry_nr; i++) {
+                data[i][0] = temp[i][0];
+                data[i][1]= temp[i][1];
+                data[i][2] = temp[i][2];
+            }
+
+            String[][] newDataTemp = new String [data.length][2];
+            int dataIter = 0;
+
+
+
+            for (int i = 0; i < data.length; i++) {
+
+                if (data[i][2].equals("true\n")) {
+                    String food_name = data[i][0];
+                    food_name = food_name.replace("\n","");
+
+                    sqlStatement = "SELECT COUNT(*) FROM order_entries WHERE protein = '"+ food_name +"' AND date >= '"+ Date +"' AND date < CURRENT_DATE";
+                    ResultSet result_sold = stmt.executeQuery(sqlStatement);
+                    result_sold.next();
+                    int sold = Integer.parseInt(result_sold.getString("count"));
+
+                    sqlStatement = "SELECT max_count FROM inventory WHERE food_name = '" + food_name + "'";
+                    ResultSet result_total = stmt.executeQuery(sqlStatement);
+                    result_total.next();
+                    double total = (double)Integer.parseInt(result_total.getString("max_count"));
+                    System.out.println(food_name + ": " + sold + "/" + total);
+
+                    if (sold/total < .1) {
+                        newDataTemp[dataIter][0] = data[i][0];
+                        newDataTemp[dataIter][1] = String.valueOf(sold/total);
+                        dataIter++;
+                    }
+                } else {
+
+                    String food_name = data[i][0];
+                    food_name = food_name.replace("\n","");
+                    if (food_name.equals("16oz_Fountain")) {
+                        sqlStatement = "SELECT COUNT(*) FROM order_entries WHERE drink_16oz = '1' AND date >= ' "+ Date+ "' AND date < CURRENT_DATE";
+
+                        ResultSet result_sold = stmt.executeQuery(sqlStatement);
+                        result_sold.next();
+                        int sold = Integer.parseInt(result_sold.getString("count"));
+                        
+                        sqlStatement = "SELECT max_count FROM inventory WHERE food_name = '16oz_Fountain'";
+                        ResultSet result_total = stmt.executeQuery(sqlStatement);
+                        result_total.next();
+                        double total = (double)Integer.parseInt(result_total.getString("max_count"));
+                        System.out.println(food_name + ": " + sold + "/" + total);
+
+                        
+                        if (sold/total < .1) {
+                            newDataTemp[dataIter][0] = data[i][0];
+                            newDataTemp[dataIter][1] = String.valueOf(sold/total);
+                            dataIter++;
+                        }
+
+                    } else if (food_name.equals("22oz_Fountain")) {
+                        sqlStatement = "SELECT COUNT(*) FROM order_entries WHERE drink_22oz = '1' AND date >= ' "+ Date+ "' AND date < CURRENT_DATE";
+                        ResultSet result_sold = stmt.executeQuery(sqlStatement);
+                        result_sold.next();
+                        int sold = Integer.parseInt(result_sold.getString("count"));
+                        
+                        sqlStatement = "SELECT max_count FROM inventory WHERE food_name = '22oz_Fountain'";
+                        ResultSet result_total = stmt.executeQuery(sqlStatement);
+                        result_total.next();
+                        double total = (double)Integer.parseInt(result_total.getString("max_count"));
+                        System.out.println(food_name + ": " + sold + "/" + total);
+
+                        
+                        if (sold/total < .1) {
+                            newDataTemp[dataIter][0] = data[i][0];
+                            newDataTemp[dataIter][1] = String.valueOf(sold/total);
+                            dataIter++;
+                        }
+                    } else {
+                        food_name = food_name.replace("\n","");
+                        System.out.println(food_name);
+    
+                        sqlStatement = "SELECT COUNT(*) FROM order_entries WHERE "+ food_name + " = '1' AND date >= '"+ Date +"' AND date < CURRENT_DATE";
+                        ResultSet result_sold = stmt.executeQuery(sqlStatement);
+                        result_sold.next();
+                        int sold = Integer.parseInt(result_sold.getString("count"));
+    
+                        sqlStatement = "SELECT max_count FROM inventory WHERE food_name = '" + food_name + "'";
+                        ResultSet result_total = stmt.executeQuery(sqlStatement);
+                        result_total.next();
+                        double total = (double)Integer.parseInt(result_total.getString("max_count"));
+                        System.out.println(food_name + ": " + sold + "/" + total);
+
+                        if (sold/total < .1) {
+                            newDataTemp[dataIter][0] = data[i][0];
+                            newDataTemp[dataIter][1] = String.valueOf(sold/total);
+                            dataIter++;
+                        }
+                    }
+
+                }
+            }
+
+            return newDataTemp;
+
+
+            
+
+            
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.err.println(e.getClass().getName()+": "+e.getMessage());
+            System.exit(0);
+        }
+      
+        //closing the connection
+        try {
+          conn.close();
+          System.out.println("Connection Closed.");
+        } catch(Exception e) {
+          System.out.println("Connection NOT Closed.");
+        }//end try catch
+        
+        return data;
+
+      }
     /** actionPerformed(ActionEvent e) takes care of the creation of the "Today's Transactions" Table
      *
      * @param ActionEvent e -- 'this' in use case
@@ -269,7 +448,7 @@ public class manager_view extends JFrame implements ActionListener {
             f.setTitle("EXCESS REPORT: " + java.time.LocalDate.now());
 
             // pull all the menu items from the inventory to be displayed
-            String[][] inv = getInventory();
+            String[][] inv = getData(Date);
 
             // Column Names
             String[] columnNames = {"food_id", "food_name"};
