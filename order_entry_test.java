@@ -8,38 +8,49 @@ import java.util.Enumeration;
 import javax.swing.ButtonGroup;
 
 
-/*
- *  @joshbatac
- *  javac *java && java -cp ".:postgresql-42.2.8.jar" order_entry_test
+/**
+ * Demo is the GUI for server view.
+ * Demo extends JFrame and implements ActionListener.
+ * Because of this, Demo is allowed to be constructed similar to a JFrame and 
+ * ActionListener is being Overridden to allow for radiobutton action listener.
  * 
+ * @author      Joshua Batac
  */
-
 
 class Demo extends JFrame implements ActionListener { 
 
     int next_food_id = 0; //seasonal item food ID
     int order_id = 0;
-    int customer_id = -1;
+    int customer_id = -1; //first customer, sameCustomer.isSelected() will always be false
     double curr_total = 0.0; //current price of order
     
     JTextField total = new JTextField();
     JRadioButton same_customer = new JRadioButton("Same Customer?");
     JButton back_to_login = new JButton("Sign Out");
-    ButtonGroup base = new ButtonGroup();
-    ButtonGroup protein = new ButtonGroup();
-
-    Integer[]order_items = new Integer[0];
-    String[][] menu_items = new String[0][0];
-    JRadioButton[] buttons = new JRadioButton[0];
-
-    DecimalFormat df = new DecimalFormat("0.00");
+    ButtonGroup base = new ButtonGroup(); //only one base picked
+    ButtonGroup protein = new ButtonGroup(); //only one protein picked
     
+    String[][] menu_items = new String[0][0]; //takes data from database 
+    JRadioButton[] buttons = new JRadioButton[0]; //used to turn menu_items to buttons
+    Integer[]order_items = new Integer[0]; //checks what buttons are checked
+
+    DecimalFormat df = new DecimalFormat("0.00"); //money format
+    
+    /** Sets up the top part of GUI. 
+     * Adds the Bases buttons: Bowl & Burrito
+     * 
+     * @param       none                    No parameters because it is just a setup
+     * @return      void                    Creates top layout of Demo(). Doesn't return anything
+     * @throws      none                    No throws because no parameters. Everything is constant and no variables
+     */
     void base_setup() {
+        //burrito radiobutton setup
         JRadioButton burrito = new JRadioButton();
         burrito.setText("Burrito");
         burrito.setBounds(50,30,120,50);
         this.add(burrito);
 
+        //bowl radiobutton setup
         JRadioButton bowl = new JRadioButton();
         bowl.setText("Bowl");
         bowl.setBounds(50,60,120,50);
@@ -49,10 +60,19 @@ class Demo extends JFrame implements ActionListener {
         base.add(bowl);
     } 
 
+    /** Turns gathered menu item data and turns it into buttons.
+     * Menu item is a 2D array and was populated with data from the inventory database.
+     * To be able to send orders, buttons must be made to indicate what the customer orders.
+     * Turning the array of menu items into RadioButtons allows the server to take orders correctly.
+     * 
+     * @param       str_arr                 Str_arr represents the menu items where [i][0] = name AND [i][1] = price
+     * @return      void                    Creates the buttons that can be clicked to take orders. Doesn't return anything
+     * @throws      null_handling           Error handing done with if statements. If null is ever reached in the array, break the loop.
+     */
     void arr_to_buttons(String[][] str_arr) {
 
-        int y_val = 120;
-        int protein_space = 0;
+        int y_val = 120; //gui spaciing
+        int protein_space = 0; //extra spacing after protein group
         buttons = new JRadioButton[str_arr.length];
         for (int i = 0; i < str_arr.length; i++) {
             if (str_arr[i][0] == null) { break; }
@@ -61,6 +81,7 @@ class Demo extends JFrame implements ActionListener {
             temp.addActionListener(this);
             this.add(temp);
 
+            //protein check
             if (str_arr[i][2].equals("true\n")) {
                 protein.add(temp);
             } else {
@@ -82,11 +103,23 @@ class Demo extends JFrame implements ActionListener {
 
     }//end of arr_to_buttons
 
+     /** Miscellaneous buttons for various task. The buttons: back_to_login, sendOrder, total, clear, addSeasonal.
+     * <ul>
+     * <li>back_to_login: Logs out of order entry GUI and back to log in page.
+     * <li>sendOrder: Sends order and queries SQL command to update order_entries and inventory
+     * <li>total: textbox showing updated current total
+     * <li>addSeasonal: adding a seasonal item to GUI, order_entries, and inventory
+     * </ul>
+     * 
+     * @param       none                    No parameters because it is just a setup
+     * @return      void                    Creates misc buttons for various taks. No return.
+     * @throws      NumberFormatException   addSeasonal throws if user input price is not a valid double.
+     */
     void misc_buttons() {
 
+        //logout
         back_to_login.setBounds(590,45,120,30);
         this.add(back_to_login);
-
         back_to_login.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
 
@@ -96,14 +129,11 @@ class Demo extends JFrame implements ActionListener {
             }
         });
 
-
+        //same customer radiobutton
         same_customer.setBounds(30,640,200,50);
         this.add(same_customer);
-        //same customer
 
-
-
-        //send Order
+        //send Order 
         JButton sendOrder = new JButton("Send Order");
         sendOrder.setBounds(30,690,120,30);
 
@@ -118,7 +148,7 @@ class Demo extends JFrame implements ActionListener {
         });
 
 
-        //Total
+        //total textbox
         total.setEditable(false);
         total.setText("Total: " + df.format(curr_total));
         total.setBounds(600,690,100,30);
@@ -132,6 +162,8 @@ class Demo extends JFrame implements ActionListener {
 
         clear.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
+
+                //resetting all buttons
                 base.clearSelection();
                 protein.clearSelection();
                 curr_total = 0;
@@ -145,16 +177,21 @@ class Demo extends JFrame implements ActionListener {
             }
         });
 
+        //add Seasonal
         JButton addSeasonal = new JButton("Add Seasonal Item");
         addSeasonal.setBounds(270,690,200,30);
         this.add(addSeasonal);
         addSeasonal.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 String seasonal_name = JOptionPane.showInputDialog("Name of Seasonal Item: ");
+
+                //check if name is valid
                 if (seasonal_name.isBlank()) {
                     JOptionPane.showMessageDialog(null, "Not a Valid Name");
                     return;
                 }
+
+                //check if name doesn't already exists
                 for (int i = 0; i < menu_items.length; i++) {
                     if (menu_items[i][0] == null) {break;}
                     String temp = menu_items[i][0];
@@ -167,6 +204,8 @@ class Demo extends JFrame implements ActionListener {
                 }
 
                 String seasonal_price = JOptionPane.showInputDialog("Price of \"" + seasonal_name + "\"(x.xx): ");
+
+                //check if price is valid double
                 try {
                     Double.parseDouble(seasonal_price);
                 } catch (NumberFormatException e_) {
@@ -176,7 +215,8 @@ class Demo extends JFrame implements ActionListener {
 
                 String max_count = JOptionPane.showInputDialog("Max Count of \"" + seasonal_name + "\"(non-neg int): ");
 
-                if (  Integer.parseInt(max_count) < 0) {
+                //check if max_count is valid int
+                if (  Integer.parseInt(max_count) <= 0) {
                     JOptionPane.showMessageDialog(null,"Not a Valid Count.");
                     return;
                 }
@@ -186,11 +226,17 @@ class Demo extends JFrame implements ActionListener {
                 JOptionPane.showMessageDialog(null,"Added \"" + seasonal_name + "\": $" + seasonal_price + " to menu.");
             }
         });
-
-
-
     }
 
+    /** The purpose of this function is to look through the button group and returns what the name of what button is being selected.
+     * Used for button groups: base and protein
+     * Base: base contains Bowl and Burrito
+     * Protein: Chicken, Steak, Ground Beef, Roasted Vegetables
+     * 
+     * @param       buttonGroup             Takes in a button group to iterate through (Base or Protein)
+     * @return      String                  Returns the name of the button
+     * @throws      "N/A"                   If no button was pressed, returns N/A
+     */
     String getSelectedButtonText(ButtonGroup buttonGroup) {
         for (Enumeration<AbstractButton> buttons = buttonGroup.getElements(); buttons.hasMoreElements();) {
             AbstractButton button = buttons.nextElement();
@@ -204,6 +250,15 @@ class Demo extends JFrame implements ActionListener {
         return "N/A";
     }
 
+    /** Creates a valid sql Statement that can be queried into the database.
+     * The Base and Protein is determined by getSelectedButtonText() and is used to create a statements that can be passed.
+     * This statement is used in sendData to updatee order_entries and inventory
+     * 
+     * @param       base_                   Predetermined String base made by getSelectedButtonText() used in return string
+     * @param       protein_                Predetermined String protein made by getSelectedButtonText() used in return string
+     * @return      String                  Returns valid String for SQL Queries
+     * @throws      null_checker            If nothing is ordered, returns without creating a sqlStatment. A invalid statement will not run.
+     */
     String sqlStatementFunction(String base_, String protein_) {
 
         //0-4 are proteins, everything after is something to add
@@ -234,7 +289,8 @@ class Demo extends JFrame implements ActionListener {
 
         base_ = base_.replace("\n","");
         protein_ = protein_.replace("\n", "");
-    
+        
+        //if length is greater than 13 (normal menu), there is a seasonal item added
         if (buttons.length > 13) {
             ret = "INSERT INTO order_entries (order_number, customer, base, protein, guacamole, queso, chips_salsa, chips_queso, chips_guac, brownie, cookie, drink_16oz, drink_22oz, cost, date) VALUES ( " + ordernumber_stmt + "," + customer_id + ",\'" + base_ + "\',\'" + protein_  + "\', \'" + order_items[4] + "\', \'" + order_items[6] + "\', \'" + order_items[6] + "\', \'" + order_items[7] + "\', \'" + order_items[8] + "\', \'" + order_items[9] + "\', \'" + order_items[10] + "\', \'" + order_items[11] + "\', \'" + order_items[12] + "\', " + df.format(curr_total) + ", \'" + date + "\', \'" + order_items[13] + "\')";
         } else {
@@ -255,6 +311,17 @@ class Demo extends JFrame implements ActionListener {
         return ret;
     }
 
+    /** Adds user input seasonal item to GUI, inventory, and order_entries.
+     * GUI: Adds seasonal item as a button.
+     * Inventory: Adds seasonal item as a row.
+     * Order_entries: Adds seasonal item as a column.
+     * 
+     * @param       seasonal_name           Name of seasonal item
+     * @param       seasonal_price          Price of seasonal item
+     * @param       max_count               Max amount of seaonal item in inventory
+     * @return      void                    No return because this function sends and updates data to GUI, inventory, and order_entries.
+     * @throws      JDBC_Exceptions         Try, catch, and throws for connecting to db, actions in db, and closing db.
+     */
     void addSeasonalItem(String seasonal_name, String seasonal_price, String max_count) {
         Connection conn = null;
         String teamNumber = "22";
@@ -280,9 +347,10 @@ class Demo extends JFrame implements ActionListener {
 
             String sqlStatement = "INSERT INTO inventory (food_id, food_name, current_count, max_count, sell_price, is_menu_item) VALUES (" + next_food_id + ",\'" + seasonal_name + "\',0," + max_count + "," + seasonal_price + ",'t')";
 
-            //JOptionPane.showMessageDialog(null,sqlStatement);
+            //inserting into inventory
             stmt.executeUpdate(sqlStatement);
 
+            //inserting into order_entries
             sqlStatement = "ALTER TABLE order_entries ADD " + seasonal_name + " BIT";
             stmt.executeUpdate(sqlStatement);
 
@@ -306,6 +374,12 @@ class Demo extends JFrame implements ActionListener {
         //SwingUtilities.updateComponentTreeUI(this);
     }
         
+    /** Goes into to database and retrieves all menu items from inventory.
+     * 
+     * @param       none                    No parameters, retrieves data from database and adds it to String[][]
+     * @return      String[][]              Returns rows from inventory that contains name and price
+     * @throws      JDBC_Exceptions         Try, catch, and throws for connecting to db, actions in db, and closing db.
+     */
     String[][] getData() { //string[] that contains [food_name] [sell_price]
         String[][] data = new String[0][0];
         Connection conn = null;
@@ -342,7 +416,7 @@ class Demo extends JFrame implements ActionListener {
             result = stmt.executeQuery(sqlStatement);
 
             
-            String[][]temp = new String [length][3];
+            String[][]temp = new String [length][3]; //used to get exact length of array needed for data
             int entry_nr = 0;
             while (result.next()) {
 
@@ -387,6 +461,14 @@ class Demo extends JFrame implements ActionListener {
 
       } //end of getdata
 
+    /** Sends Data to database.
+     * Updates the order_entries by adding a row.
+     * Updates the inventory by modifying current count of bought items.
+     * 
+     * @param       sqlStatement            Takes in sqlStatement created by sqlStatementFunction() to be queried
+     * @return      void                    No return because this function sends and updates data to inventory and order_entries. 
+     * @throws      JDBC_Exceptions         Try, catch, and throws for connecting to db, actions in db, and closing db.
+     */
     void sendData(String sqlStatement) {
         Boolean isempty = true;
         for (int i = 0; i < order_items.length; i++) {
@@ -419,8 +501,10 @@ class Demo extends JFrame implements ActionListener {
             //create a statement object
             Statement stmt = conn.createStatement();
 
+            //sending order to order entries
             stmt.executeUpdate(sqlStatement); //executeUpdate to get arround execption
 
+            //updating inventory
             for (int i = 0; i < order_items.length; i++) {
                 if (order_items[i] == 1) {
                     String column_name = menu_items[i][0];
@@ -445,16 +529,20 @@ class Demo extends JFrame implements ActionListener {
         System.out.println("Connection NOT Closed.");
         }//end try catch
 
-        order_items = new Integer[buttons.length];
+        order_items = new Integer[buttons.length]; //reseting ordered items
     }
 
+    /** Used to reload after adding a Seasonal Item. 
+     * Essentially creates a new instance of Demo() and deletes the old one. 
+     * Used specifically in addSeasonalItem().
+     * 
+     * @param       none                    Reloads the class so no parameters needed. All information is in function
+     * @return      void                    Creates new instance in function, doesn't return anything.
+     * @throws      none                    Calls constructor again and there are no throws in constructor
+     */
     void updateView() {
-        //basically rerunning main function
-        Demo f = new Demo(); 
-        f.setBounds(100, 100, 768, 768); 
-        f.setTitle("CABO GRILL ORDER ENTRY (+ SEASONAL ITEMS)"); 
-        f.setVisible(true); 
-        menu_items = new String[0][0];
+        //basically constructor
+        new Demo(); 
         buttons = new JRadioButton[0];
         menu_items = getData();
         this.setLayout(null);
@@ -463,6 +551,12 @@ class Demo extends JFrame implements ActionListener {
         misc_buttons();
     }
 
+    /** Demo Constructor, create GUI and uses all functions.
+     * 
+     * @param       none                    Demo class constructor
+     * @return      none                    Demo class constructor
+     * @throws      none                    Demo class constructor
+     */
     public Demo() {
         menu_items = getData();
         this.setLayout(null);
@@ -471,7 +565,9 @@ class Demo extends JFrame implements ActionListener {
         misc_buttons();
         this.setBounds(100, 100, 768, 768); 
         this.setTitle("CABO GRILL ORDER ENTRY"); 
+        this.setExtendedState(JFrame.MAXIMIZED_BOTH);
         this.setVisible(true); 
+
         JPanel panel=new JPanel();
         JScrollPane scrollBar=new JScrollPane(panel,JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
         this.add(scrollBar);
@@ -479,6 +575,13 @@ class Demo extends JFrame implements ActionListener {
 
     }
 
+    /** Overriding Actionlistener to work with JRadioButtons.
+     * Allows JRadioButtons to real time update the current total of the customer's order.
+     * 
+     * @param       ActionEvent             ActionEvent used to override Action Listener                    
+     * @return      void                    Used as an ActionListener so no return
+     * @throws      null_checker            if button[i] is null, break and return
+     */
     @Override
     public void actionPerformed(ActionEvent e) {
         curr_total = 0.0;
@@ -508,8 +611,4 @@ class Demo extends JFrame implements ActionListener {
     }
 }
 
-public class order_entry_test {
-    public static void main(String args[]) {
-        new Demo();
-    }//end main
-}//end Class
+public class order_entry_test { public static void main(String args[]) { new Demo(); } }
