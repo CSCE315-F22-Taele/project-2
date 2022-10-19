@@ -102,8 +102,8 @@ public class manager_view extends JFrame implements ActionListener {
 
 
         // third label
-        lbl3 = new JLabel("Itemized revenue up to today in YYYY-MM-DD format: ");
-        lbl3.setBounds(35, 285, 250, 20);
+        lbl3 = new JLabel("Itemized revenue up to today's date:");
+        lbl3.setBounds(35, 285, 300, 20);
         txtfld3 = new JTextField();
         LocalDate dt = java.time.LocalDate.now();
         txtfld3.setText(dt.toString());
