@@ -189,7 +189,6 @@ public class inventory_view implements ActionListener{
             f.getContentPane().removeAll();
             f.repaint();
             f.dispose();
-            System.out.println(f == null);
             p = null;
         } else if (s.equals("Add Item")) {
             try {
